@@ -39,7 +39,8 @@ const createGame = (request, response) => {
       if (error) {
         throw error;
       }
-      response.status(201).send(`Game added with ID: ${results.rows[0].id}`);
+      console.log("Game Created");
+      response.status(201);
     }
   );
 };
