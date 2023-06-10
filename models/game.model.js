@@ -5,9 +5,15 @@ module.exports = (sequelize, Sequelize) => {
     },
     date: {
       type: Sequelize.DATE,
+      validate: { isDate: true },
     },
     time: {
       type: Sequelize.TIME,
+      validate: {
+        isDate: {
+          msg: "Please enter a valid date",
+        },
+      },
     },
     game_length: {
       type: Sequelize.INTEGER,

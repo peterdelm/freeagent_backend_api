@@ -4,6 +4,7 @@ const Op = db.Sequelize.Op;
 
 // Create and Save a new Game
 exports.create = (req, res) => {
+  console.log("A request has arrived");
   // Validate request
   if (!req.body.location) {
     res.status(400).send({
@@ -29,8 +30,15 @@ exports.create = (req, res) => {
   Game.create(game)
     .then((data) => {
       res.send(data);
+      console.log("Game Added");
     })
     .catch((err) => {
+      console.log("Problem with request");
+      console.log("err.name", err.name);
+      console.log("err.message", err.message);
+      console.log("err.errors", err.errors);
+      err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
+
       res.status(500).send({
         message: err.message || "Some error occurred while creating the Game.",
       });
