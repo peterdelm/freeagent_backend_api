@@ -36,6 +36,7 @@ app.get("/", (req, res) => {
 });
 
 require("./routes/game.routes")(app);
+require("./routes/goalie.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3001;

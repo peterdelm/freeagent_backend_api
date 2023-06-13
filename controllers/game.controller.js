@@ -1,5 +1,6 @@
 const db = require("../models");
 const Game = db.games;
+const Goalie = db.goalies;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new Game
@@ -37,7 +38,7 @@ exports.create = (req, res) => {
       console.log("err.name", err.name);
       console.log("err.message", err.message);
       console.log("err.errors", err.errors);
-      err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
+      // err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
 
       res.status(500).send({
         message: err.message || "Some error occurred while creating the Game.",
@@ -153,4 +154,42 @@ exports.findAllPublished = (req, res) => {
         message: err.message || "Some error occurred while retrieving Games.",
       });
     });
+};
+
+//Find a goalie who meets the criteria
+exports.findTheRightGoalie = (req, res) => {
+  const game = {
+    location: req.body.location,
+    date: req.body.date,
+    time: req.body.time,
+    game_length: req.body.game_length,
+    calibre: req.body.calibre,
+    game_type: req.body.game_type,
+    gender: req.body.gender,
+    team_name: req.body.team_name,
+    additional_info: req.body.additional_info,
+  };
+
+  const gender = game.gender;
+  const calibre = game.calibre;
+  const game_type = game.game_type;
+
+  console.log("Request for goalie received");
+
+  const potential_goalies = Goalie.findAll({
+    where: { gender: gender, personal_calibre: calibre },
+    //where GAME_LOCATION to ADDRESS <= TRAVEL_RANGE (call this distanceBetween)
+  });
+
+  potential_goalies
+    .then((data) => {
+      res.send(data[0]); //sends the first goalie in the array
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving Games.",
+      });
+    });
+  //create game
+  //find goalie where: calibre, gender, gametype
 };
