@@ -32,6 +32,9 @@ module.exports = (sequelize, Sequelize) => {
     additional_info: {
       type: Sequelize.TEXT,
     },
+    is_active: {
+      type: Sequelize.BOOLEAN,
+    },
   });
 
   return Game;

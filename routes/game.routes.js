@@ -12,6 +12,9 @@ module.exports = (app) => {
   // Retrieve all published Games
   router.get("/published", games.findAllPublished);
 
+  // Retrieve all published Games
+  router.get("/active", games.findAllActive);
+
   // Retrieve a single Games with id
   router.get("/:id", games.findOne);
 

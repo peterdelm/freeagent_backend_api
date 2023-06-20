@@ -25,6 +25,7 @@ exports.create = (req, res) => {
     gender: req.body.gender,
     team_name: req.body.team_name,
     additional_info: req.body.additional_info,
+    is_active: true,
   };
 
   // Save Game in the database
@@ -52,6 +53,50 @@ exports.findAll = (req, res) => {
   var condition = title ? { title: { [Op.iLike]: `%${title}%` } } : null;
 
   Game.findAll({ where: condition })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving games.",
+      });
+    });
+};
+
+// Retrieve all Active Games from the database.
+exports.findAllActive = (req, res) => {
+  console.log("FindAll Request Received");
+  Game.findAll({ where: { is_active: true } })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving games.",
+      });
+    });
+};
+
+// Retrieve all Sport Specific Variables from the database.
+
+exports.getSportVariables = (req, res) => {
+  console.log("GetSportVariables Request Received");
+  Game.findAll({ where: { is_active: true } })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving games.",
+      });
+    });
+};
+
+// Retrieve all Sports from the database.
+
+exports.getSports = (req, res) => {
+  console.log("GetSports Request Received");
+  Game.findAll({ where: { is_active: true } })
     .then((data) => {
       res.send(data);
     })
@@ -143,7 +188,7 @@ exports.deleteAll = (req, res) => {
     });
 };
 
-// find all published Game
+// find all published Games
 exports.findAllPublished = (req, res) => {
   Game.findAll({ where: { published: true } })
     .then((data) => {
