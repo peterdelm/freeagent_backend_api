@@ -77,36 +77,6 @@ exports.findAllActive = (req, res) => {
     });
 };
 
-// Retrieve all Sport Specific Variables from the database.
-
-exports.getSportVariables = (req, res) => {
-  console.log("GetSportVariables Request Received");
-  Game.findAll({ where: { is_active: true } })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving games.",
-      });
-    });
-};
-
-// Retrieve all Sports from the database.
-
-exports.getSports = (req, res) => {
-  console.log("GetSports Request Received");
-  Game.findAll({ where: { is_active: true } })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving games.",
-      });
-    });
-};
-
 // Find a single Game with an id
 exports.findOne = (req, res) => {
   const id = req.params.id;

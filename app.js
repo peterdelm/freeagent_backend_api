@@ -2,6 +2,7 @@
 var indexRouter = require("./routes/index");
 var gamesRouter = require("./routes/game.routes");
 var goaliesRouter = require("./routes/goalie.routes");
+var sportsRouter = require("./routes/sports.routes");
 
 const express = require("express");
 const createError = require("http-errors");
@@ -42,6 +43,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/games", gamesRouter);
 app.use("/goalies", goaliesRouter);
+app.use("/sports", sportsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

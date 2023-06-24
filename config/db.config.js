@@ -1,6 +1,6 @@
 module.exports = {
   HOST: "localhost",
-  USER: "postgres",
+  USER: "peter",
   PASSWORD: "sudo",
   DB: "freeagent_database",
   dialect: "postgres",

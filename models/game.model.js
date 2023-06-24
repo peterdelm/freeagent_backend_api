@@ -13,6 +13,9 @@ module.exports = (sequelize, Sequelize) => {
     },
     time: {
       type: Sequelize.TIME,
+      isDate: {
+        msg: "Please enter a valid time",
+      },
     },
     game_length: {
       type: Sequelize.INTEGER,
