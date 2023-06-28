@@ -6,7 +6,7 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
       },
       game_length: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
       },
       game_type: {
         type: Sequelize.STRING,
@@ -15,6 +15,9 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
       },
       position: {
+        type: Sequelize.STRING,
+      },
+      gender: {
         type: Sequelize.STRING,
       },
     },
