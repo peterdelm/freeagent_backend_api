@@ -1,0 +1,7 @@
+CREATE TABLE sports (
+    sport VARCHAR(128), 
+    game_length VARCHAR(256)[], 
+    game_type VARCHAR(256)[], 
+    calibre VARCHAR(256)[], 
+    position VARCHAR(256)[]
+    );

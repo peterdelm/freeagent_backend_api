@@ -38,6 +38,16 @@ module.exports = (sequelize, Sequelize) => {
     is_active: {
       type: Sequelize.BOOLEAN,
     },
+    createdAt: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      allowNull: false,
+    },
+    updatedAt: {
+      type: Sequelize.DATE,
+      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      allowNull: false,
+    },
   });
 
   return Game;
