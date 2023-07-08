@@ -1,5 +1,10 @@
 module.exports = (sequelize, Sequelize) => {
   const Goalie = sequelize.define("goalie", {
+    id: {
+      type: Sequelize.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
     first_name: {
       type: Sequelize.STRING,
     },

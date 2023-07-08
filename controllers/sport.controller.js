@@ -1,7 +1,5 @@
 const db = require("../models");
-const Game = db.games;
 const Sport = db.sports;
-const Op = db.Sequelize.Op;
 
 // Retrieve all Sports from the database.
 
@@ -36,7 +34,6 @@ exports.create = (req, res) => {
     game_length: req.body.game_length,
     calibre: req.body.calibre,
     game_type: req.body.game_type,
-    gender: req.body.gender,
   };
 
   // Save Game in the database
