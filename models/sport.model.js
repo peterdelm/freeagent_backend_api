@@ -15,7 +15,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     calibre: {
-      type: Sequelize.DATE,
+      type: Sequelize.STRING,
     },
     position: {
       type: Sequelize.STRING,
