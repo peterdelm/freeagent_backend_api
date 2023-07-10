@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     date: {
-      type: Sequelize.DATE,
+      type: Sequelize.DATEONLY,
       validate: {
         isDate: {
           msg: "Please enter a valid date",
@@ -23,13 +23,13 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     game_length: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
     },
     calibre: {
       type: Sequelize.STRING,
     },
     game_type: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
     },
     gender: {
       type: Sequelize.STRING,

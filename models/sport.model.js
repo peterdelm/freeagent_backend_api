@@ -9,16 +9,19 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     game_length: {
-      type: Sequelize.STRING,
+      type: Sequelize.ARRAY(Sequelize.STRING),
     },
     game_type: {
-      type: Sequelize.STRING,
+      type: Sequelize.ARRAY(Sequelize.STRING),
     },
     calibre: {
-      type: Sequelize.STRING,
+      type: Sequelize.ARRAY(Sequelize.STRING),
     },
     position: {
-      type: Sequelize.STRING,
+      type: Sequelize.ARRAY(Sequelize.STRING),
+    },
+    gender: {
+      type: Sequelize.ARRAY(Sequelize.STRING),
     },
     createdAt: {
       type: Sequelize.DATE,

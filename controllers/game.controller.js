@@ -31,7 +31,12 @@ exports.create = (req, res) => {
   // Save Game in the database
   Game.create(game)
     .then((data) => {
-      res.send(data);
+      const response = {
+        success: true, // Set the success property to true
+        data: data, // Assign the created game object to the data property
+        message: "Game Added",
+      };
+      res.status(200).send(response);
       console.log("Game Added");
     })
     .catch((err) => {

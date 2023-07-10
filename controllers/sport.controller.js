@@ -34,6 +34,7 @@ exports.create = (req, res) => {
     game_length: req.body.game_length,
     calibre: req.body.calibre,
     game_type: req.body.game_type,
+    gender: req.body.gender,
   };
 
   // Save Game in the database
