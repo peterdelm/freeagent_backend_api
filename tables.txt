@@ -5,3 +5,7 @@ CREATE TABLE sports (
     calibre VARCHAR(256)[], 
     position VARCHAR(256)[]
     );
+
+    CREATE TABLE users (
+
+    );

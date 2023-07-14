@@ -3,11 +3,11 @@ var indexRouter = require("./routes/index");
 var gamesRouter = require("./routes/game.routes");
 var goaliesRouter = require("./routes/goalie.routes");
 var sportsRouter = require("./routes/sports.routes");
+var usersRouter = require("./routes/sports.routes");
 
 const express = require("express");
 const createError = require("http-errors");
 const path = require("path");
-const dbConfig = require("./config/db.config");
 
 const app = express();
 
@@ -17,9 +17,6 @@ const sequelize = new Sequelize("freeagent_database", "peter", "sudo", {
   host: "127.0.0.1",
   dialect: "postgres",
 });
-
-const dev_db_url = "http://localhost:3001";
-const postgresDB = dev_db_url;
 
 main().catch((err) => console.log(err));
 async function main() {
@@ -44,6 +41,7 @@ app.use("/", indexRouter);
 app.use("/games", gamesRouter);
 app.use("/goalies", goaliesRouter);
 app.use("/sports", sportsRouter);
+app.use("/users", usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
