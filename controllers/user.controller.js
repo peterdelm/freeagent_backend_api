@@ -16,6 +16,8 @@ exports.findAll = (req, res) => {
 };
 
 exports.retrieveToken = (req, res) => {
+  console.log("RetrieveUserToken Request Received");
+
   res.send({
     token: "test123",
   });
