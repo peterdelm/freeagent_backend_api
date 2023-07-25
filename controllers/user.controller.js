@@ -78,7 +78,7 @@ exports.create = (req, res) => {
     });
   }
   // Save User in the database
-  const [result, created] = User.findOrCreate({
+  const result = User.findOrCreate({
     where: { email: user.email },
     defaults: {
       first_name: user.first_name,
@@ -87,6 +87,7 @@ exports.create = (req, res) => {
       address: user.address,
       birthdate: user.birthdate,
       password: user.password,
+      is_active: true,
     },
   })
     .then((data) => {
@@ -94,13 +95,13 @@ exports.create = (req, res) => {
       console.log("User Added");
       console.log(result.email); // 'sdepold'
       console.log(user.last_name); // This may or may not be 'Technical Lead JavaScript'
-      console.log(created); // The boolean indicating whether this instance was just created
-      if (created) {
-        console.log(user.last_name); // This will certainly be 'Technical Lead JavaScript'
-        res.status(500).send({
-          message: err.message || "This email already exists",
-        });
-      }
+      // console.log(created); // The boolean indicating whether this instance was just created
+      // if (created) {
+      //   console.log(user.last_name); // This will certainly be 'Technical Lead JavaScript'
+      //   res.status(500).send({
+      //     message: err.message || "This email already exists",
+      //   });
+      // }
     })
     .catch((err) => {
       console.log("Problem with request");
