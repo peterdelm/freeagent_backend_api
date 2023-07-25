@@ -8,7 +8,7 @@ exports.create = (req, res) => {
   // Validate request
   if (!req.body.address) {
     res.status(400).send({
-      message: "address can not be empty!",
+      messageOp: "address can not be empty!",
     });
     return;
   }

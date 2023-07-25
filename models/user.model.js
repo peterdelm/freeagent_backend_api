@@ -20,6 +20,9 @@ module.exports = (sequelize, Sequelize) => {
     birthdate: {
       type: Sequelize.DATEONLY,
     },
+    password: {
+      type: Sequelize.STRING,
+    },
     is_active: {
       type: Sequelize.BOOLEAN,
     },

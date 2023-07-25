@@ -8,8 +8,5 @@ module.exports = (app) => {
   router.post("/id", users.login);
   router.post("/", users.create);
 
-  // // Retrieve a single Sport with id
-  // router.get("/:id", sports.findOne);
-
   app.use("/api/users", router);
 };
