@@ -23,23 +23,46 @@ exports.retrieveToken = (req, res) => {
   });
 };
 
-exports.login = (req, res) => {
-  //find the user by email
-  const user = User.findOne({ where: { email: req.body.email } });
-  if (user === null) {
-    console.log("Not found!");
-  } else {
-    console.log(user instanceof User); // true
-    console.log(user.email); // 'My Title'
-    console.log(user.password); // 'My Title'
+exports.login = async (req, res) => {
+  try {
+    // Find the user by email
+    const user = await User.findOne({ where: { email: req.body.email } });
+
+    if (user === null) {
+      res.status(401).send({
+        error: "User not found",
+      });
+      console.log("Not found!");
+    } else {
+      if (req.body.password === user.password) {
+        console.log(typeof req.body.password);
+        console.log(user instanceof User); // true
+        console.log(user.email); // 'My Title'
+        console.log(typeof user.password); // 'My Title'
+
+        res.send({
+          token: "test123",
+        });
+      } else {
+        console.log(typeof req.body.password);
+        console.log(user instanceof User); // true
+        console.log(user.email); // 'My Title'
+        console.log(typeof user.password); // 'My Title'
+        res.status(401).send({
+          error: "Incorrect username/password",
+        });
+      }
+    }
+  } catch (err) {
+    // Handle any errors that occur during the asynchronous operation
+    console.error(err);
+    res.status(500).send({
+      error: "Internal Server Error",
+    });
   }
-  //compare password
-  //SUCCESS: send token
-  //FAILURE: send failure notice
-  console.log(req.body);
-  res.send({
-    token: "test123",
-  });
+
+  // Other code for password comparison and token generation should be added here
+  // ...
 };
 
 // Find a single Game with an id
