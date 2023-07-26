@@ -1,7 +1,7 @@
 const db = require("../models");
 const User = db.users;
 
-// Retrieve all Sports from the database.
+// Retrieve all Users from the database.
 
 exports.findAll = (req, res) => {
   User.findAll()
@@ -26,7 +26,9 @@ exports.retrieveToken = (req, res) => {
 exports.login = async (req, res) => {
   try {
     // Find the user by email
-    const user = await User.findOne({ where: { email: req.body.email } });
+    const user = await User.findOne({
+      where: { email: req.body.emailAddress },
+    });
 
     if (user === null) {
       res.status(401).send({
@@ -40,7 +42,7 @@ exports.login = async (req, res) => {
         console.log(user.email); // 'My Title'
         console.log(typeof user.password); // 'My Title'
 
-        res.send({
+        res.status(200).send({
           token: "test123",
         });
       } else {
@@ -83,23 +85,28 @@ exports.findOne = (req, res) => {
 // Create and Save a new User
 exports.create = (req, res) => {
   console.log("A 'Create User' request has arrived");
-  console.log(req.body.first_name);
 
-  const user = {
-    first_name: req.body.first_name,
-    last_name: req.body.last_name,
-    email: req.body.email,
-    address: req.body.address,
-    birthdate: req.body.birthdate,
-    password: req.body.password,
-  };
+  console.log("Line 90: " + req.body.firstName);
+
+  const { firstName, lastName, emailAddress, password } = req.body;
 
   // Validate request
-  if (!req.body.email) {
+  if (!firstName || !lastName || !emailAddress || !password) {
+    console.log("Some fields are empty");
+
     res.status(400).send({
-      message: "Content can not be empty!",
+      message: "All fields are required!",
     });
+    return;
   }
+
+  const user = {
+    first_name: firstName,
+    last_name: lastName,
+    email: emailAddress,
+    password: password,
+  };
+
   // Save User in the database
   const result = User.findOrCreate({
     where: { email: user.email },
@@ -107,14 +114,17 @@ exports.create = (req, res) => {
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email,
-      address: user.address,
-      birthdate: user.birthdate,
       password: user.password,
       is_active: true,
     },
   })
     .then((data) => {
-      res.send(data);
+      const response = {
+        success: true, // Set the success property to true
+        data: data, // Assign the created game object to the data property
+        message: "Game Added",
+      };
+      res.status(200).send(response);
       console.log("User Added");
       console.log(result.email); // 'sdepold'
       console.log(user.last_name); // This may or may not be 'Technical Lead JavaScript'
