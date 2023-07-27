@@ -1,5 +1,11 @@
 const db = require("../models");
 const User = db.users;
+const jwt = require("jsonwebtoken");
+
+//generate a secure JWT (JSON Web Token)
+const generateToken = (user) => {
+  
+};
 
 // Retrieve all Users from the database.
 
