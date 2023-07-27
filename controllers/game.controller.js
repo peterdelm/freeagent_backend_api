@@ -71,6 +71,8 @@ exports.findAll = (req, res) => {
 // Retrieve all Active Games from the database.
 exports.findAllActive = (req, res) => {
   console.log("FindAll Active Games Request Received");
+  console.log(req.headers);
+
   Game.findAll({ where: { is_active: true } })
     .then((data) => {
       res.send(data);
