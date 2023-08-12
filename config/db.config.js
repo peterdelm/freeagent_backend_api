@@ -1,8 +1,10 @@
+require("dotenv").config();
+
 module.exports = {
   HOST: "localhost",
-  USER: "peter",
-  PASSWORD: "sudo",
-  DB: "freeagent_database",
+  USER: process.env.DB_USERNAME,
+  PASSWORD: process.env.DB_PASSWORD,
+  DB: process.env.DB_NAME,
   dialect: "postgres",
   port: 5432,
   pool: {

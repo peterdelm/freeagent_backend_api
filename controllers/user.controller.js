@@ -1,10 +1,20 @@
 const db = require("../models");
 const User = db.users;
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 //generate a secure JWT (JSON Web Token)
-const generateToken = (user) => {
-  
+const generateToken = (userId) => {
+  const secretKey = process.env.SECRET;
+  console.log("generateToken called");
+  console.log(userId);
+  const payload = {
+    userID: userId,
+  };
+
+  const token = jwt.sign(payload, secretKey, { expiresIn: "24h" });
+  console.log(token);
+  return token;
 };
 
 // Retrieve all Users from the database.
@@ -47,9 +57,10 @@ exports.login = async (req, res) => {
         console.log(user instanceof User); // true
         console.log(user.email); // 'My Title'
         console.log(typeof user.password); // 'My Title'
+        const token = generateToken(user.id);
 
         res.status(200).send({
-          token: "test123",
+          token: token,
         });
       } else {
         console.log(typeof req.body.password);
