@@ -70,10 +70,28 @@ exports.findAll = (req, res) => {
 
 // Retrieve all Active Games from the database.
 exports.findAllActive = (req, res) => {
+  const jwt = require("jsonwebtoken");
+  const secretKey = process.env.SECRET;
   console.log("FindAll Active Games Request Received");
 
-  //FIND THE ID
-  console.log(req.headers);
+  //FIND THE ID of the User
+  console.log("Auth token is " + req.headers.authorization);
+  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+  console.log("jwtFromHeader is " + jwtFromHeader);
+
+  // Decode and verify the JWT
+  jwt.verify(jwtFromHeader, secretKey, (err, decoded) => {
+    if (err) {
+      // JWT verification failed
+      console.log("JWT verification failed");
+      // Handle the error (e.g., return an error response)
+    } else {
+      // JWT verification succeeded
+      const userId = decoded.userID;
+      console.log("User ID is " + userId);
+      // Now you can use the userId in your server logic
+    }
+  });
 
   Game.findAll({ where: { is_active: true } })
     .then((data) => {

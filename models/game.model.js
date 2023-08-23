@@ -40,6 +40,13 @@ module.exports = (sequelize, Sequelize) => {
     additional_info: {
       type: Sequelize.TEXT,
     },
+    userId: {
+      type: Sequelize.UUID,
+      references: {
+        model: "users", // This should match the table name of the User model
+        key: "id", // This should match the primary key of the User model
+      },
+    },
     is_active: {
       type: Sequelize.BOOLEAN,
     },
@@ -54,6 +61,10 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
   });
+
+  Game.associate = (models) => {
+    Game.belongsTo(models.User, { foreignKey: "userId" });
+  };
 
   return Game;
 };
