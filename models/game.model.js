@@ -1,9 +1,11 @@
+const { v4: uuidv4 } = require("uuid");
+
 module.exports = (sequelize, Sequelize) => {
   const Game = sequelize.define("game", {
     id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.UUID,
+      defaultValue: () => uuidv4(),
       primaryKey: true,
-      autoIncrement: true,
     },
     location: {
       type: Sequelize.STRING,
@@ -46,6 +48,7 @@ module.exports = (sequelize, Sequelize) => {
         model: "users", // This should match the table name of the User model
         key: "id", // This should match the primary key of the User model
       },
+      allowNull: false,
     },
     is_active: {
       type: Sequelize.BOOLEAN,

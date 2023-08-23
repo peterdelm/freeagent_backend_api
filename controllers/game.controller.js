@@ -5,7 +5,11 @@ const Op = db.Sequelize.Op;
 
 // Create and Save a new Game
 exports.create = (req, res) => {
-  console.log("A request has arrived");
+  console.log("A create game request has arrived");
+  console.log("Location is " + req.headers);
+
+  console.log("Location is " + req.body.location);
+
   // Validate request
   if (!req.body.location) {
     res.status(400).send({
@@ -13,6 +17,26 @@ exports.create = (req, res) => {
     });
     return;
   }
+  console.log(req.headers);
+
+  const jwt = require("jsonwebtoken");
+  const secretKey = process.env.SECRET;
+  //FIND THE ID of the User
+  console.log("Auth token is " + req.headers.authorization);
+  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+  console.log("jwtFromHeader is " + jwtFromHeader);
+
+  // Decode and verify the JWT
+  const userId = jwt.verify(jwtFromHeader, secretKey, (err, decoded) => {
+    if (err) {
+      console.log("JWT verification failed");
+    } else {
+      const userId = decoded.userID;
+      console.log("User ID is " + userId);
+
+      return userId;
+    }
+  });
 
   // Create a Game
   const game = {
@@ -26,6 +50,7 @@ exports.create = (req, res) => {
     team_name: req.body.team_name,
     additional_info: req.body.additional_info,
     is_active: true,
+    userId: userId,
   };
 
   // Save Game in the database
@@ -80,7 +105,7 @@ exports.findAllActive = (req, res) => {
   console.log("jwtFromHeader is " + jwtFromHeader);
 
   // Decode and verify the JWT
-  jwt.verify(jwtFromHeader, secretKey, (err, decoded) => {
+  const userId = jwt.verify(jwtFromHeader, secretKey, (err, decoded) => {
     if (err) {
       // JWT verification failed
       console.log("JWT verification failed");
@@ -89,11 +114,13 @@ exports.findAllActive = (req, res) => {
       // JWT verification succeeded
       const userId = decoded.userID;
       console.log("User ID is " + userId);
+      return userId;
+
       // Now you can use the userId in your server logic
     }
   });
 
-  Game.findAll({ where: { is_active: true } })
+  Game.findAll({ where: { is_active: true, userId: userId } })
     .then((data) => {
       res.send(data);
     })
