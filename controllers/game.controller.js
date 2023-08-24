@@ -133,6 +133,7 @@ exports.findAllActive = (req, res) => {
 
 // Find a single Game with an id
 exports.findOne = (req, res) => {
+  console.log("findOne game request received");
   const id = req.params.id;
 
   Game.findByPk(id)
