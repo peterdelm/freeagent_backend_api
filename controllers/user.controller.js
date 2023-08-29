@@ -100,11 +100,8 @@ exports.findOne = (req, res) => {
 };
 
 // Create and Save a new User
-exports.create = (req, res) => {
+exports.create = async (req, res) => {
   console.log("A 'Create User' request has arrived");
-
-  console.log("Line 90: " + req.body.firstName);
-
   const { firstName, lastName, emailAddress, password } = req.body;
 
   // Validate request
@@ -124,45 +121,53 @@ exports.create = (req, res) => {
     password: password,
   };
 
-  // Save User in the database
-  const result = User.findOrCreate({
-    where: { email: user.email },
-    defaults: {
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-      password: user.password,
-      is_active: true,
-    },
-  })
-    .then((data) => {
-      const response = {
-        success: true, // Set the success property to true
-        data: data, // Assign the created game object to the data property
-        message: "Game Added",
-      };
-      res.status(200).send(response);
-      console.log("User Added");
-      console.log(result.email); // 'sdepold'
-      console.log(user.last_name); // This may or may not be 'Technical Lead JavaScript'
-      // console.log(created); // The boolean indicating whether this instance was just created
-      // if (created) {
-      //   console.log(user.last_name); // This will certainly be 'Technical Lead JavaScript'
-      //   res.status(500).send({
-      //     message: err.message || "This email already exists",
-      //   });
-      // }
-    })
-    .catch((err) => {
-      console.log("Problem with request");
-      console.log("err.name", err.name);
-      console.log("err.message", err.message);
-      console.log("err.errors", err.errors);
-      // err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
-
-      res.status(500).send({
-        message: err.message || "Some error occurred while creating the Game.",
-      });
+  try {
+    const [result, created] = await User.findOrCreate({
+      where: { email: user.email },
+      defaults: {
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        password: user.password,
+        is_active: true,
+      },
     });
+    console.log("Result.created is " + created);
+    console.log("Result.email is " + result.email);
+    if (result.email === user.email)
+      if (created) {
+        console.log("Result is " + result.id);
+
+        const token = generateToken(result.id);
+        res.status(200).send({
+          success: true,
+          token: token,
+        });
+
+        console.log("Line 90: " + req.body.firstName);
+        console.log("req.body is " + req.body);
+        console.log("req.headers is " + req.headers);
+        console.log("req.body.firstName is " + req.body.firstName);
+      } else {
+        console.log("Failure while creating an account");
+        console.log("User with email " + user.email + " already exists.");
+        res.status(401).send({
+          success: false,
+          message: "A user with that email already exists.",
+        });
+      }
+    else {
+      console.log("Failure while creating an account");
+    }
+  } catch (err) {
+    console.log("Problem with request");
+    console.log("err.name", err.name);
+    console.log("err.message", err.message);
+    console.log("err.errors", err.errors);
+    res.status(500).send({
+      message: err.message || "Some error occurred while creating the Game.",
+    });
+  }
+
   return;
 };
