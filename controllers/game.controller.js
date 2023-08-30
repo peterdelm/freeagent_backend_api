@@ -94,41 +94,50 @@ exports.findAll = (req, res) => {
 };
 
 // Retrieve all Active Games from the database.
-exports.findAllActive = (req, res) => {
-  const jwt = require("jsonwebtoken");
-  const secretKey = process.env.SECRET;
+exports.findAllActive = async (req, res) => {
   console.log("FindAll Active Games Request Received");
 
-  //FIND THE ID of the User
-  console.log("Auth token is " + req.headers.authorization);
-  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-  console.log("jwtFromHeader is " + jwtFromHeader);
+  const jwt = require("jsonwebtoken");
+  const secretKey = process.env.SECRET;
 
-  // Decode and verify the JWT
-  const userId = jwt.verify(jwtFromHeader, secretKey, (err, decoded) => {
-    if (err) {
-      // JWT verification failed
-      console.log("JWT verification failed");
-      // Handle the error (e.g., return an error response)
-    } else {
-      // JWT verification succeeded
-      const userId = decoded.userID;
-      console.log("User ID is " + userId);
-      return userId;
+  try {
+    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
 
-      // Now you can use the userId in your server logic
-    }
-  });
+    // Decode and verify the JWT
+    const decoded = jwt.verify(jwtFromHeader, secretKey);
+    const userId = decoded.userID;
 
-  Game.findAll({ where: { is_active: true, userId: userId } })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
+    console.log("JWT verification succeeded. User ID is " + userId);
+
+    //FIND ACTIVE GAMES BELONGING TO THE USER
+    try {
+      console.log("Finding active games for user " + userId + "...");
+      const activeGames = await Game.findAll({
+        where: { is_active: true, userId: userId },
+      });
+      let message = "";
+      if (activeGames.length === 0) {
+        message = "No active games found.";
+      } else {
+        message = "Active games found.";
+      }
+      console.log("Active games are " + activeGames);
+
+      const response = {
+        success: true,
+        data: activeGames,
+        message: message,
+      };
+      res.status(200).send(response);
+    } catch (err) {
       res.status(500).send({
         message: err.message || "Some error occurred while retrieving games.",
       });
-    });
+    }
+  } catch (err) {
+    console.log("JWT verification failed");
+    res.status(401).send({ message: "Unauthorized" });
+  }
 };
 
 // Find a single Game with an id
