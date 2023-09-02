@@ -4,18 +4,17 @@ VALUES ('Hockey',
    '{"3v3 (Ice)","5v5 (Ice)","5v5 (Floor)"}',
    '{"A (Semi Proj/ Major Jr experience)", "B (Jr B/C, Varsity, AA/AAA experience)", "C (Select, Rep/ All Star, A experience)", "D (House League experience)", "E (little/ no experience)"}','{"Goaltender", "Any non-goalie", "Forward", "Defence"}');
 
-
 INSERT INTO sports (sport, game_length, game_type, calibre, position)
    VALUES ('Soccer', 
     '{60, 90, 120}',
    '{"11v11 (Outdoor - Grass)","11v11 (Outdoor - Turf)","7v7 (Outdoor - Grass)", "7v7 (Outdoor - Turf)", "6v6 (Outdoor - Grass)", "6v6 (Outdoor - Turf)", "6v6 (Indoor - Turf)"}',
-   '{"Recreational", "Intermediate", "Advanced"}','{"Goaltender", "Any non-goalie", "Forward", "Midfielder" "Defence"}');
+   '{"Recreational", "Intermediate", "Advanced"}','{"Goaltender", "Any non-goalie", "Forward", "Midfielder", "Defence"}');
 
    INSERT INTO sports (sport, game_length, game_type, calibre, position)
    VALUES ('Volleyball', 
     '{60, 90, 120}',
    '{"6v6 (Outdoor - Beach)", "6v6 (Indoor - Beach)", "6v6 (Indoor - Court)", "4v4 (Outdoor - Beach)", "2v2 (Indoor - Beach)", "2v2 (Indoor - Court)"}',
-   '{"Recreational", "Intermediate", "Advanced"}','{"Any", "Setter", "Hitter", "Libero", "Blocker}');
+   '{"Recreational", "Intermediate", "Advanced"}','{"Any", "Setter", "Hitter", "Libero", "Blocker"}');
 
    INSERT INTO sports (sport, game_length, game_type, calibre, position)
    VALUES ('Ultimate Frisbee', 
