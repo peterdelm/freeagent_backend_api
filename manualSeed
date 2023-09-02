@@ -1,0 +1,30 @@
+INSERT INTO sports (sport, game_length, game_type, calibre, position)
+VALUES ('Hockey', 
+    '{60, 90, 120}',
+   '{"3v3 (Ice)","5v5 (Ice)","5v5 (Floor)"}',
+   '{"A (Semi Proj/ Major Jr experience)", "B (Jr B/C, Varsity, AA/AAA experience)", "C (Select, Rep/ All Star, A experience)", "D (House League experience)", "E (little/ no experience)"}','{"Goaltender", "Any non-goalie", "Forward", "Defence"}');
+
+
+INSERT INTO sports (sport, game_length, game_type, calibre, position)
+   VALUES ('Soccer', 
+    '{60, 90, 120}',
+   '{"11v11 (Outdoor - Grass)","11v11 (Outdoor - Turf)","7v7 (Outdoor - Grass)", "7v7 (Outdoor - Turf)", "6v6 (Outdoor - Grass)", "6v6 (Outdoor - Turf)", "6v6 (Indoor - Turf)"}',
+   '{"Recreational", "Intermediate", "Advanced"}','{"Goaltender", "Any non-goalie", "Forward", "Midfielder" "Defence"}');
+
+   INSERT INTO sports (sport, game_length, game_type, calibre, position)
+   VALUES ('Volleyball', 
+    '{60, 90, 120}',
+   '{"6v6 (Outdoor - Beach)", "6v6 (Indoor - Beach)", "6v6 (Indoor - Court)", "4v4 (Outdoor - Beach)", "2v2 (Indoor - Beach)", "2v2 (Indoor - Court)"}',
+   '{"Recreational", "Intermediate", "Advanced"}','{"Any", "Setter", "Hitter", "Libero", "Blocker}');
+
+   INSERT INTO sports (sport, game_length, game_type, calibre, position)
+   VALUES ('Ultimate Frisbee', 
+    '{60, 90, 120}',
+   '{"7v7 (Outdoor - Grass)", "7v7 (Outdoor - Turf)", "7v7 (Indoor - Grass)", "7v7 (Indoor - Turf)", "6v6 (Outdoor - Grass)", "6v6 (Outdoor - Turf)", "6v6 (Indoor - Grass)", "6v6 (Indoor - Turf)", "5v5 (Outdoor - Grass)", "5v5 (Outdoor - Turf)", "5v5 (Indoor - Grass)", "5v5 (Indoor - Turf)"}',
+   '{"Recreational", "Intermediate", "Advanced"}','{"Any", "Handler", "Cutter"}');
+
+      INSERT INTO sports (sport, game_length, game_type, calibre, position)
+   VALUES ('Basketball', 
+    '{60, 90, 120}',
+   '{"5v5 (Outdoor)","5v5 (Indoor)","4v4 (Outdoor)","4v4 (Indoor)", "3v3 (Outdoor)","3v3 (Indoor)"}',
+   '{"Recreational", "Competitive"}','{"Any", "Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"}');

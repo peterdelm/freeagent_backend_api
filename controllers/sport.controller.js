@@ -3,16 +3,29 @@ const Sport = db.sports;
 
 // Retrieve all Sports from the database.
 
-exports.findAll = (req, res) => {
-  Sport.findAll()
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving games.",
+//Make this asyncronous
+exports.findAll = async (req, res) => {
+  try {
+    const sports = await Sport.findAll();
+    if (sports) {
+      console.log(sports);
+      res.status(200).send({
+        sports: sports,
       });
+    } else {
+      res.status(500).send({
+        error: "Internal Server Error. Sports not found.",
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send({
+      error: "Internal Server Error",
     });
+  }
+  (data) => {
+    res.send(data);
+  };
 };
 
 // Create and Save a new Sport
