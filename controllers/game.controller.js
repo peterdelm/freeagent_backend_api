@@ -4,77 +4,89 @@ const Goalie = db.goalies;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new Game
-exports.create = (req, res) => {
-  console.log("A create game request has arrived");
-  console.log("Location is " + req.headers);
+exports.create = async (req, res) => {
+  try {
+    console.log("A create game request has arrived");
+    console.log("Location is " + req.headers);
 
-  console.log("Location is " + req.body.location);
+    console.log("Location is " + req.body.location);
 
-  // Validate request
-  if (!req.body.location) {
-    res.status(400).send({
-      message: "Content can not be empty!",
-    });
-    return;
-  }
-  console.log(req.headers);
-
-  const jwt = require("jsonwebtoken");
-  const secretKey = process.env.SECRET;
-  //FIND THE ID of the User
-  console.log("Auth token is " + req.headers.authorization);
-  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-  console.log("jwtFromHeader is " + jwtFromHeader);
-
-  // Decode and verify the JWT
-  const userId = jwt.verify(jwtFromHeader, secretKey, (err, decoded) => {
-    if (err) {
-      console.log("JWT verification failed");
-    } else {
-      const userId = decoded.userID;
-      console.log("User ID is " + userId);
-
-      return userId;
+    // Validate request
+    if (!req.body.location) {
+      res.status(400).send({
+        message: "Content can not be empty!",
+      });
+      return;
     }
-  });
+    console.log(req.headers);
 
-  // Create a Game
-  const game = {
-    location: req.body.location,
-    date: req.body.date,
-    time: req.body.time,
-    game_length: req.body.game_length,
-    calibre: req.body.calibre,
-    game_type: req.body.game_type,
-    gender: req.body.gender,
-    team_name: req.body.team_name,
-    additional_info: req.body.additional_info,
-    is_active: true,
-    userId: userId,
-  };
+    const jwt = require("jsonwebtoken");
+    const secretKey = process.env.SECRET;
+    //FIND THE ID of the User
+    console.log("Auth token is " + req.headers.authorization);
+    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+    console.log("jwtFromHeader is " + jwtFromHeader);
 
-  // Save Game in the database
-  Game.create(game)
-    .then((data) => {
+    // Decode and verify the JWT
+    const userId = await jwt.verify(
+      jwtFromHeader,
+      secretKey,
+      (err, decoded) => {
+        if (err) {
+          console.log("JWT verification failed");
+        } else {
+          const userId = decoded.userID;
+          console.log("User ID is " + userId);
+
+          return userId;
+        }
+      }
+    );
+
+    // Create a Game
+    const game = {
+      location: req.body.location,
+      date: req.body.date,
+      time: req.body.time,
+      game_length: req.body.game_length,
+      calibre: req.body.calibre,
+      game_type: req.body.game_type,
+      gender: req.body.gender,
+      team_name: req.body.team_name,
+      additional_info: req.body.additional_info,
+      is_active: true,
+      userId: userId,
+    };
+
+    // Save Game in the database
+    const newGame = await Game.create(game);
+    try {
       const response = {
         success: true, // Set the success property to true
-        data: data, // Assign the created game object to the data property
+        game: newGame,
         message: "Game Added",
       };
       res.status(200).send(response);
       console.log("Game Added");
-    })
-    .catch((err) => {
+
       console.log("Problem with request");
       console.log("err.name", err.name);
       console.log("err.message", err.message);
       console.log("err.errors", err.errors);
       // err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
-
+    } catch (err) {
       res.status(500).send({
         message: err.message || "Some error occurred while creating the Game.",
       });
+    }
+  } catch (err) {
+    console.log(
+      "There was a problem in game creation, line 80. Error is " + error
+    );
+    res.status(500).send({
+      message: err.message || "Some error occurred while creating the Game.",
     });
+  }
 };
 
 // Retrieve all Games from the database.
@@ -125,7 +137,7 @@ exports.findAllActive = async (req, res) => {
 
       const response = {
         success: true,
-        data: activeGames,
+        activeGames: activeGames,
         message: message,
       };
       res.status(200).send(response);
