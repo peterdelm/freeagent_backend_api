@@ -1,7 +1,7 @@
 // const db = require("./queries");
 var indexRouter = require("./routes/index");
 var gamesRouter = require("./routes/game.routes");
-var goaliesRouter = require("./routes/goalie.routes");
+var playersRouter = require("./routes/player.routes");
 var sportsRouter = require("./routes/sports.routes");
 var usersRouter = require("./routes/sports.routes");
 
@@ -39,7 +39,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", indexRouter);
 app.use("/games", gamesRouter);
-app.use("/goalies", goaliesRouter);
+app.use("/players", playersRouter);
 app.use("/sports", sportsRouter);
 app.use("/users", usersRouter);
 

@@ -1,8 +1,8 @@
 const db = require("../models");
-const Goalie = db.goalies;
+const Player = db.players;
 const Op = db.Sequelize.Op;
 
-// Create and Save a new Goalie
+// Create and Save a new Player
 exports.create = (req, res) => {
   console.log("A request has arrived");
   // Validate request
@@ -13,8 +13,8 @@ exports.create = (req, res) => {
     return;
   }
 
-  // Create a Goalie
-  const goalie = {
+  // Create a player
+  const player = {
     first_name: req.body.first_name,
     last_name: req.body.last_name,
     address: req.body.address,
@@ -28,11 +28,11 @@ exports.create = (req, res) => {
     bio: req.body.bio,
   };
 
-  // Save Goalie in the database
-  Goalie.create(goalie)
+  // Save player in the database
+  Player.create(player)
     .then((data) => {
       res.send(data);
-      console.log("Goalie Added");
+      console.log("player Added");
     })
     .catch((err) => {
       console.log("Problem with request");
@@ -43,118 +43,118 @@ exports.create = (req, res) => {
 
       res.status(500).send({
         message:
-          err.message || "Some error occurred while creating the Goalie.",
+          err.message || "Some error occurred while creating the player.",
       });
     });
 };
 
-// Retrieve all Goalies from the database.
+// Retrieve all players from the database.
 exports.findAll = (req, res) => {
   const title = req.query.title;
   var condition = title ? { title: { [Op.iLike]: `%${title}%` } } : null;
 
-  Goalie.findAll({ where: condition })
+  Player.findAll({ where: condition })
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while retrieving goalies.",
+        message: err.message || "Some error occurred while retrieving players.",
       });
     });
 };
 
-// Find a single Goalie with an id
+// Find a single player with an id
 exports.findOne = (req, res) => {
   const id = req.params.id;
 
-  Goalie.findByPk(id)
+  Player.findByPk(id)
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Goalie with id=" + id,
+        message: "Error retrieving player with id=" + id,
       });
     });
 };
 
-// Update a Goalie by the id in the request
+// Update a player by the id in the request
 exports.update = (req, res) => {
   const id = req.params.id;
 
-  Goalie.update(req.body, {
+  Player.update(req.body, {
     where: { id: id },
   })
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: "Goalie was updated successfully.",
+          message: "player was updated successfully.",
         });
       } else {
         res.send({
-          message: `Cannot update Goalie with id=${id}. Maybe Goalie was not found or req.body is empty!`,
+          message: `Cannot update player with id=${id}. Maybe player was not found or req.body is empty!`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error updating Goalie with id=" + id,
+        message: "Error updating player with id=" + id,
       });
     });
 };
 
-// Delete a Goalie with the specified id in the request
+// Delete a player with the specified id in the request
 exports.delete = (req, res) => {
   const id = req.params.id;
 
-  Goalie.destroy({
+  Player.destroy({
     where: { id: id },
   })
     .then((num) => {
       if (num == 1) {
         res.send({
-          message: "Goalie was deleted successfully!",
+          message: "Player was deleted successfully!",
         });
       } else {
         res.send({
-          message: `Cannot delete Goalie with id=${id}. Maybe Goalie was not found!`,
+          message: `Cannot delete player with id=${id}. Maybe player was not found!`,
         });
       }
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Could not delete Goalie with id=" + id,
+        message: "Could not delete player with id=" + id,
       });
     });
 };
 
-// Delete all Goalies from the database.
+// Delete all players from the database.
 exports.deleteAll = (req, res) => {
-  Goalies.destroy({
+  Player.destroy({
     where: {},
     truncate: false,
   })
     .then((nums) => {
-      res.send({ message: `${nums} Goalies were deleted successfully!` });
+      res.send({ message: `${nums} players were deleted successfully!` });
     })
     .catch((err) => {
       res.status(500).send({
         message:
-          err.message || "Some error occurred while removing all Goalies.",
+          err.message || "Some error occurred while removing all players.",
       });
     });
 };
 
-// find all published Goalie
+// find all published player
 exports.findAllPublished = (req, res) => {
-  Goalie.findAll({ where: { published: true } })
+  Player.findAll({ where: { published: true } })
     .then((data) => {
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Some error occurred while retrieving Goalies.",
+        message: err.message || "Some error occurred while retrieving players.",
       });
     });
 };

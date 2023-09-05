@@ -27,7 +27,7 @@ module.exports = (app) => {
   // Delete all Games
   router.delete("/", games.deleteAll);
 
-  router.post("/find_a_goalie", games.findTheRightGoalie);
+  router.post("/find_a_player", games.findTheRightPlayer);
 
   app.use("/api/games", router);
 };

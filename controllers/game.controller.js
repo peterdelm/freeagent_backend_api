@@ -1,6 +1,6 @@
 const db = require("../models");
 const Game = db.games;
-const Goalie = db.goalies;
+const Player = db.players;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new Game
@@ -247,8 +247,8 @@ exports.findAllPublished = (req, res) => {
     });
 };
 
-//Find a goalie who meets the criteria
-exports.findTheRightGoalie = (req, res) => {
+//Find a player who meets the criteria
+exports.findTheRightPlayer = (req, res) => {
   const game = {
     location: req.body.location,
     date: req.body.date,
@@ -265,16 +265,16 @@ exports.findTheRightGoalie = (req, res) => {
   const calibre = game.calibre;
   const game_type = game.game_type;
 
-  console.log("Request for goalie received");
+  console.log("Request for players received");
 
-  const potential_goalies = Goalie.findAll({
+  const potential_players = Player.findAll({
     where: { gender: gender, personal_calibre: calibre },
     //where GAME_LOCATION to ADDRESS <= TRAVEL_RANGE (call this distanceBetween)
   });
 
-  potential_goalies
+  potential_players
     .then((data) => {
-      res.send(data[0]); //sends the first goalie in the array
+      res.send(data[0]); //sends the first player in the array
     })
     .catch((err) => {
       res.status(500).send({
@@ -282,5 +282,5 @@ exports.findTheRightGoalie = (req, res) => {
       });
     });
   //create game
-  //find goalie where: calibre, gender, gametype
+  //find player where: calibre, gender, gametype, sport
 };

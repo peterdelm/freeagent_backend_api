@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Goalie = sequelize.define("goalie", {
+  const Player = sequelize.define("player", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -47,5 +47,5 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
-  return Goalie;
+  return Player;
 };

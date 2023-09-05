@@ -36,7 +36,7 @@ app.get("/", (req, res) => {
 });
 
 require("./routes/game.routes")(app);
-require("./routes/goalie.routes")(app);
+require("./routes/player.routes")(app);
 require("./routes/sport.routes")(app);
 require("./routes/user.routes")(app);
 // set port, listen for requests
