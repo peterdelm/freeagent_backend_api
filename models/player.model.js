@@ -35,6 +35,14 @@ module.exports = (sequelize, Sequelize) => {
     bio: {
       type: Sequelize.TEXT,
     },
+    userId: {
+      type: Sequelize.UUID,
+      references: {
+        model: "users", // This should match the table name of the User model
+        key: "id", // This should match the primary key of the User model
+      },
+      allowNull: false,
+    },
     createdAt: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
