@@ -35,6 +35,15 @@ module.exports = (sequelize, Sequelize) => {
     bio: {
       type: Sequelize.TEXT,
     },
+    sport: {
+      type: Sequelize.STRING,
+    },
+    position: {
+      type: Sequelize.STRING,
+    },
+    is_active: {
+      type: Sequelize.BOOLEAN,
+    },
     userId: {
       type: Sequelize.UUID,
       references: {
