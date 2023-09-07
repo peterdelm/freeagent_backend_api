@@ -60,29 +60,25 @@ exports.create = async (req, res) => {
 
     // Save Game in the database
     const newGame = await Game.create(game);
-    try {
-      const response = {
-        success: true, // Set the success property to true
-        game: newGame,
-        message: "Game Added",
-      };
-      res.status(200).send(response);
-      console.log("Game Added");
 
-      console.log("Problem with request");
-      console.log("err.name", err.name);
-      console.log("err.message", err.message);
-      console.log("err.errors", err.errors);
-      // err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
-    } catch (err) {
-      res.status(500).send({
-        message: err.message || "Some error occurred while creating the Game.",
-      });
-    }
+    const response = {
+      success: true, // Set the success property to true
+      game: newGame,
+      message: "Game Added",
+    };
+    res.status(200).send(response);
+    console.log("Game Added");
+
+    // err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
   } catch (err) {
     console.log(
-      "There was a problem in game creation, line 80. Error is " + error
+      "There was a problem in game creation, line 80. Error is " + err
     );
+
+    console.log("Problem with request");
+    console.log("err.name", err.name);
+    console.log("err.message", err.message);
+    console.log("err.errors", err.errors);
     res.status(500).send({
       message: err.message || "Some error occurred while creating the Game.",
     });

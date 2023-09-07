@@ -3,49 +3,75 @@ const Player = db.players;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new Player
-exports.create = (req, res) => {
-  console.log("A request has arrived");
-  // Validate request
-  if (!req.body.address) {
-    res.status(400).send({
-      messageOp: "address can not be empty!",
-    });
-    return;
-  }
-
-  // Create a player
-  const player = {
-    first_name: req.body.first_name,
-    last_name: req.body.last_name,
-    address: req.body.address,
-    gender: req.body.gender,
-    birthdate: req.body.birthdate,
-    years_played: req.body.years_played,
-    personal_calibre: req.body.personal_calibre,
-    desired_calibre: req.body.desired_calibre,
-    travel_range: req.body.travel_range,
-    game_types: req.body.game_types,
-    bio: req.body.bio,
-  };
-
-  // Save player in the database
-  Player.create(player)
-    .then((data) => {
-      res.send(data);
-      console.log("player Added");
-    })
-    .catch((err) => {
-      console.log("Problem with request");
-      console.log("err.name", err.name);
-      console.log("err.message", err.message);
-      console.log("err.errors", err.errors);
-      //   err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
-
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the player.",
+exports.create = async (req, res) => {
+  try {
+    console.log("A Create Player Request has arrived");
+    // Validate request
+    if (!req.body.location) {
+      res.status(400).send({
+        messageOp: "address can not be empty!",
       });
+      return;
+    }
+
+    const jwt = require("jsonwebtoken");
+    const secretKey = process.env.SECRET;
+    //FIND THE ID of the User
+    console.log("Auth token is " + req.headers.authorization);
+    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+    console.log("jwtFromHeader is " + jwtFromHeader);
+
+    // Decode and verify the JWT
+    const userId = await jwt.verify(
+      jwtFromHeader,
+      secretKey,
+      (err, decoded) => {
+        if (err) {
+          console.log("JWT verification failed");
+        } else {
+          const userId = decoded.userID;
+          console.log("User ID is " + userId);
+
+          return userId;
+        }
+      }
+    );
+
+    // Create a player
+    const player = {
+      gender: req.body.gender,
+      personal_calibre: req.body.personal_calibre,
+      location: req.body.location,
+      sport: req.body.sport,
+      travel_range: req.body.travelRange,
+      position: req.body.position,
+      bio: req.body.additional_info,
+      userId: userId,
+      is_active: true,
+    };
+
+    const newPlayer = await Player.create(player);
+
+    // Save player in the database
+    Player.create(player);
+    const response = {
+      success: true, // Set the success property to true
+      player: newPlayer,
+      message: "Player Added",
+    };
+    res.status(200).send(response);
+    console.log("Game Added");
+  } catch (err) {
+    console.log("Problem with request");
+    console.log("err.name", err.name);
+    console.log("err.message", err.message);
+    console.log("err.errors", err.errors);
+    //   err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
+
+    res.status(500).send({
+      message: err.message || "Some error occurred while creating the player.",
     });
+  }
 };
 
 // Retrieve all players from the database.
@@ -157,4 +183,45 @@ exports.findAllPublished = (req, res) => {
         message: err.message || "Some error occurred while retrieving players.",
       });
     });
+};
+
+exports.findAllUserPlayers = async (req, res) => {
+  console.log("FindAll User Players Request Received");
+
+  try {
+    const jwt = require("jsonwebtoken");
+    const secretKey = process.env.SECRET;
+    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+
+    // Decode and verify the JWT
+    const decoded = jwt.verify(jwtFromHeader, secretKey);
+    const userId = decoded.userID;
+
+    console.log("JWT verification succeeded. User ID is " + userId);
+
+    //FIND ACTIVE GAMES BELONGING TO THE USER
+
+    console.log("Finding player profiles for user " + userId + "...");
+    const players = await Player.findAll({
+      where: { userId: userId },
+    });
+    let message = "";
+    if (players.length === 0) {
+      message = "No Player Profiles found.";
+    } else {
+      message = "Players found.";
+    }
+    console.log("Active players are " + players);
+
+    const response = {
+      success: true,
+      players: players,
+      message: message,
+    };
+    console.log(response.players);
+    res.status(200).send(response);
+  } catch (err) {
+    console.log("JWT verification failed");
+    res.status(401).send({ message: "Unauthorized" });
+  }
 };

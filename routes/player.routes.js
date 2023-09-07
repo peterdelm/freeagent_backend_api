@@ -11,6 +11,8 @@ module.exports = (app) => {
 
   // Retrieve all published players
   router.get("/published", players.findAllPublished);
+  // Retrieve a single Player with id
+  router.get("/player_roster", players.findAllUserPlayers);
 
   // Retrieve a single Player with id
   router.get("/:id", players.findOne);
