@@ -1,9 +1,9 @@
 module.exports = (sequelize, Sequelize) => {
   const Player = sequelize.define("player", {
     id: {
-      type: Sequelize.INTEGER,
+      type: Sequelize.UUID,
+      defaultValue: () => uuidv4(),
       primaryKey: true,
-      autoIncrement: true,
     },
     first_name: {
       type: Sequelize.STRING,
