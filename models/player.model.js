@@ -1,3 +1,5 @@
+const { v4: uuidv4 } = require("uuid");
+
 module.exports = (sequelize, Sequelize) => {
   const Player = sequelize.define("player", {
     id: {
@@ -37,6 +39,14 @@ module.exports = (sequelize, Sequelize) => {
     },
     sport: {
       type: Sequelize.STRING,
+    },
+    sportId: {
+      type: Sequelize.INTEGER,
+      references: {
+        model: "sports", // This should match the table name of the User model
+        key: "id", // This should match the primary key of the User model
+      },
+      allowNull: false,
     },
     position: {
       type: Sequelize.STRING,

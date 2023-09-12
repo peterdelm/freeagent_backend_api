@@ -40,9 +40,10 @@ exports.create = async (req, res) => {
     // Create a player
     const player = {
       gender: req.body.gender,
-      personal_calibre: req.body.personal_calibre,
+      personal_calibre: req.body.calibre,
       location: req.body.location,
       sport: req.body.sport,
+      sportId: req.body.sportId,
       travel_range: req.body.travelRange,
       position: req.body.position,
       bio: req.body.additional_info,
@@ -92,6 +93,7 @@ exports.findAll = (req, res) => {
 
 // Find a single player with an id
 exports.findOne = (req, res) => {
+  console.log("Player.findOne Called")
   const id = req.params.id;
 
   Player.findByPk(id)

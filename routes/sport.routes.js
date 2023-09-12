@@ -4,6 +4,7 @@ module.exports = (app) => {
   var router = require("express").Router();
 
   // Retrieve all Sports
+  router.get("/:id", sports.findOne);
   router.get("/", sports.findAll);
   router.post("/", sports.create);
 
