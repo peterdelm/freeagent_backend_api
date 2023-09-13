@@ -13,7 +13,7 @@ module.exports = (sequelize, Sequelize) => {
     last_name: {
       type: Sequelize.STRING,
     },
-    address: {
+    location: {
       type: Sequelize.STRING,
     },
     birthdate: {
@@ -25,7 +25,7 @@ module.exports = (sequelize, Sequelize) => {
     years_played: {
       type: Sequelize.INTEGER,
     },
-    personal_calibre: {
+    calibre: {
       type: Sequelize.STRING,
     },
     game_length: {

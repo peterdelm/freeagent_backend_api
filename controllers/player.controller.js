@@ -40,7 +40,7 @@ exports.create = async (req, res) => {
     // Create a player
     const player = {
       gender: req.body.gender,
-      personal_calibre: req.body.calibre,
+      calibre: req.body.calibre,
       location: req.body.location,
       sport: req.body.sport,
       sportId: req.body.sportId,
@@ -50,11 +50,11 @@ exports.create = async (req, res) => {
       userId: userId,
       is_active: true,
     };
+    console.log(player);
 
     const newPlayer = await Player.create(player);
 
     // Save player in the database
-    Player.create(player);
     const response = {
       success: true, // Set the success property to true
       player: newPlayer,
@@ -93,7 +93,7 @@ exports.findAll = (req, res) => {
 
 // Find a single player with an id
 exports.findOne = (req, res) => {
-  console.log("Player.findOne Called")
+  console.log("Player.findOne Called");
   const id = req.params.id;
 
   Player.findByPk(id)
