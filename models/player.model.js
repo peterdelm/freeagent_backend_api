@@ -15,24 +15,43 @@ module.exports = (sequelize, Sequelize) => {
     },
     location: {
       type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: "Calibre cannot be empty.",
+        },
+      },
     },
     birthdate: {
       type: Sequelize.DATE,
     },
     gender: {
       type: Sequelize.STRING,
+      allowNull: false,
     },
     years_played: {
       type: Sequelize.INTEGER,
     },
     calibre: {
       type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: "Calibre cannot be empty.",
+        },
+      },
     },
     game_length: {
       type: Sequelize.INTEGER,
     },
-    travel_range: {
+    travelRange: {
       type: Sequelize.INTEGER,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: "Travel Range cannot be empty.",
+        },
+      },
     },
     bio: {
       type: Sequelize.TEXT,

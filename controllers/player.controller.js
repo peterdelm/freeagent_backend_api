@@ -44,9 +44,9 @@ exports.create = async (req, res) => {
       location: req.body.location,
       sport: req.body.sport,
       sportId: req.body.sportId,
-      travel_range: req.body.travelRange,
+      travelRange: req.body.travelRange,
       position: req.body.position,
-      bio: req.body.additional_info,
+      bio: req.body.bio,
       userId: userId,
       is_active: true,
     };
@@ -102,34 +102,80 @@ exports.findOne = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving player with id=" + id,
+        message: "Error retrieving player with id=" + id + err,
       });
     });
 };
 
 // Update a player by the id in the request
-exports.update = (req, res) => {
-  const id = req.params.id;
+exports.update = async (req, res) => {
+  console.log("Player.update called around 112");
 
-  Player.update(req.body, {
-    where: { id: id },
-  })
-    .then((num) => {
-      if (num == 1) {
-        res.send({
-          message: "player was updated successfully.",
-        });
-      } else {
-        res.send({
-          message: `Cannot update player with id=${id}. Maybe player was not found or req.body is empty!`,
-        });
-      }
+  try {
+    const playerId = req.params.id;
+
+    console.log("Req.body.position is " + req.body.position);
+
+    //if the value of calibre, location, position, gender is blank, use the original value
+    const { calibre, location, travelRange, gender, bio, position } = req.body;
+
+    const player = await Player.findByPk(playerId);
+    if (!player) {
+      console.log("Player not found with id" + playerId);
+      return res.status(404).json({ error: "Player not found." });
+    }
+    console.log("Position is: " + position);
+
+    //create an object to hold any changes
+    const updates = {};
+
+    //check if calibre has been included in the object and that it is not "". if they have, add them to the updates object
+    if (typeof calibre !== "undefined" && calibre.trim() !== "") {
+      updates.calibre = calibre;
+    }
+    if (typeof location !== "undefined" && location.trim() !== "") {
+      updates.location = location;
+    }
+    if (typeof travelRange !== "undefined" && travelRange.trim() !== "") {
+      updates.travelRange = travelRange;
+    }
+    if (typeof gender !== "undefined" && gender.trim() !== "") {
+      updates.gender = gender;
+    }
+    if (typeof bio !== "undefined" && bio.trim() !== "") {
+      updates.bio = bio;
+    }
+    if (typeof position !== "undefined" && position.trim() !== "") {
+      updates.position = position;
+    }
+
+    console.log("Updates are " + updates.position);
+
+    Player.update(updates, {
+      where: { id: playerId },
     })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error updating player with id=" + id,
+      .then((num) => {
+        if (num == 1) {
+          res.send({
+            success: true,
+            message: "player was updated successfully.",
+          });
+        } else {
+          console.log("Problem with player.update");
+          res.send({
+            message: `Cannot update player with id=${playerId}. Maybe player was not found or req.body is empty!`,
+          });
+        }
+      })
+      .catch((err) => {
+        res.status(500).send({
+          message: "Error updating player with id=" + playerId,
+        });
       });
-    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
 };
 
 // Delete a player with the specified id in the request
