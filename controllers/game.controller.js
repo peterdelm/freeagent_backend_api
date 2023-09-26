@@ -1,8 +1,10 @@
+require("dotenv").config();
 const db = require("../models");
 const Game = db.games;
 const Player = db.players;
 const Op = db.Sequelize.Op;
-const fetch = require("node-fetch")
+
+const helpers = require("./calculateDistance");
 
 // Create and Save a new Game
 exports.create = async (req, res) => {
@@ -44,21 +46,58 @@ exports.create = async (req, res) => {
       }
     );
 
-////////////PLACE GEOCODING CALL BELOW////////////////////
+    ////////////PLACE GEOCODING CALL BELOW////////////////////
 
+    const apiKey = process.env.GEOCODER_API_KEY;
 
+    const address = "482 Manning Avenue,Toronto,ON";
 
-async function getGeocode(address, apiKey){
+    const getGeocode = async (address, apiKey) => {
+      console.log("getGeocode has been called.");
+      const baseUrl = process.env.GEOCODER_URL;
+      console.log(" Base Geocoder URL is: " + baseUrl);
 
-  const baseurl = process.env.GEOCODER_URL;
-  console.log(baseurl)
-}
+      const queryParams = {
+        key: apiKey,
+        location: address, // Replace with your location
+      };
 
-getGeocode;
+      const queryString = new URLSearchParams(queryParams).toString();
 
-////////////PLACE GEOCODING CALL ABOVE////////////////////
+      const url = `${baseUrl}?${queryString}`;
+      console.log("Geocoder URL is: " + url);
 
-// Create a Game
+      try {
+        const headers = {
+          "Content-Type": "application/json",
+        };
+
+        const requestOptions = {
+          headers,
+        };
+
+        fetch(url, requestOptions)
+          .then((res) => {
+            if (res.ok) {
+              console.log("res was ok");
+              return res.json();
+            } else throw new Error("Network response was not ok.");
+          })
+          .then((res) => {
+            console.log("Results are...");
+            console.log(res.results[0].locations[0].latLng);
+          });
+      } catch (error) {
+        console.log("Error making authenticated request:", error);
+        // Handle error
+      }
+    };
+
+    getGeocode(address, apiKey);
+
+    ////////////PLACE GEOCODING CALL ABOVE////////////////////
+
+    // Create a Game
     const game = {
       location: req.body.location,
       date: req.body.date,
