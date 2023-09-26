@@ -2,6 +2,7 @@ const db = require("../models");
 const Game = db.games;
 const Player = db.players;
 const Op = db.Sequelize.Op;
+const fetch = require("node-fetch")
 
 // Create and Save a new Game
 exports.create = async (req, res) => {
@@ -43,7 +44,21 @@ exports.create = async (req, res) => {
       }
     );
 
-    // Create a Game
+////////////PLACE GEOCODING CALL BELOW////////////////////
+
+
+
+async function getGeocode(address, apiKey){
+
+  const baseurl = process.env.GEOCODER_URL;
+  console.log(baseurl)
+}
+
+getGeocode;
+
+////////////PLACE GEOCODING CALL ABOVE////////////////////
+
+// Create a Game
     const game = {
       location: req.body.location,
       date: req.body.date,
