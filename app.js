@@ -4,6 +4,7 @@ var gamesRouter = require("./routes/game.routes");
 var playersRouter = require("./routes/player.routes");
 var sportsRouter = require("./routes/sports.routes");
 var usersRouter = require("./routes/sports.routes");
+var geocodingRouter = require("./routes/geocoding.routes");
 
 const express = require("express");
 const createError = require("http-errors");
@@ -42,6 +43,7 @@ app.use("/games", gamesRouter);
 app.use("/players", playersRouter);
 app.use("/sports", sportsRouter);
 app.use("/users", usersRouter);
+app.use("/geocoding", geocodingRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
