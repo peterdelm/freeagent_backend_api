@@ -1,15 +1,12 @@
 require("dotenv").config();
+const axios = require('axios');
 
 exports.autocomplete = async (req, res) => {
   const apiKey = process.env.GEOCODER_API_KEY;
-
-  const address = "482 Manning Avenue,Toronto,ON";
-
-  const addressFragment = req.body.addressFragment;
+  console.log("Current text is: " + req.body.addressFragment);
 
   try {
     console.log("Address Autocomplete has been called");
-    console.log("Current text is: " + req.body.address);
 
     // fetch the addresses from mapquest      console.log("getGeocode has been called.");
     const baseUrl = process.env.ADDRESS_AUTOCOMPLETE_URL;
@@ -19,12 +16,9 @@ exports.autocomplete = async (req, res) => {
       key: apiKey,
       limit: 5,
       collection: "address",
-      q: addressFragment, // Replace with your location
+      q: req.body.addressFragment, // Replace with your location
     };
-
-    const queryString = new URLSearchParams(queryParams).toString();
-
-    const url = `${baseUrl}?${queryString}`;
+    const url = `${baseUrl}?${new URLSearchParams(queryParams)}`;
     console.log("Geocoder URL is: " + url);
 
     const headers = {
@@ -35,18 +29,20 @@ exports.autocomplete = async (req, res) => {
       headers,
     };
 
-    let potentialMatches = [];
 
-    const response = await fetch(url, requestOptions);
+    const response = await axios.get(url, { headers });
 
-    if (!response.ok) {
-      throw new Error("Network response was not ok.");
+
+ 
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    const data = await response.json();
-
-    if (data.results && data.results.length > 0) {
-      potentialMatches = data.results.slice(0, 3);
+    const data = response.data;
+console.log("Data is: " + data.results[0].displayString)
+    let potentialMatches = [];
+  if (data.results && data.results.length > 0) {
+      potentialMatches = data.results.map((result) => result.displayString);
     }
 
     const responseData = {
