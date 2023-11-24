@@ -24,6 +24,9 @@ module.exports = (sequelize, Sequelize) => {
         msg: "Please enter a valid time",
       },
     },
+    sportId: {
+      type: Sequelize.STRING,
+    },
     game_length: {
       type: Sequelize.STRING,
     },
@@ -34,6 +37,9 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
     },
     gender: {
+      type: Sequelize.STRING,
+    },
+    position: {
       type: Sequelize.STRING,
     },
     team_name: {

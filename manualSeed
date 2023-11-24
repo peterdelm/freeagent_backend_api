@@ -27,3 +27,11 @@ INSERT INTO sports (sport, game_length, game_type, calibre, position)
     '{60, 90, 120}',
    '{"5v5 (Outdoor)","5v5 (Indoor)","4v4 (Outdoor)","4v4 (Indoor)", "3v3 (Outdoor)","3v3 (Indoor)"}',
    '{"Recreational", "Competitive"}','{"Any", "Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"}');
+
+   -- TASKS TABLE --
+
+         INSERT INTO task (sport, game_length, game_type, calibre, position)
+   VALUES ('Basketball', 
+    '{60, 90, 120}',
+   '{"5v5 (Outdoor)","5v5 (Indoor)","4v4 (Outdoor)","4v4 (Indoor)", "3v3 (Outdoor)","3v3 (Indoor)"}',
+   '{"Recreational", "Competitive"}','{"Any", "Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"}');

@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
 
 const app = express();
 
@@ -29,6 +30,8 @@ db.sequelize
 // db.sequelize.sync({ force: true }).then(() => {
 //   console.log("Drop and re-sync db.");
 // });
+
+//start workers
 
 // simple route
 app.get("/", (req, res) => {

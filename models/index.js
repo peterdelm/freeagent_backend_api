@@ -21,6 +21,7 @@ db.sequelize = sequelize;
 db.games = require("./game.model.js")(sequelize, Sequelize);
 db.players = require("./player.model.js")(sequelize, Sequelize);
 db.sports = require("./sport.model.js")(sequelize, Sequelize);
+db.tasks = require("./task.model.js")(sequelize, Sequelize);
 db.users = require("./user.model.js")(sequelize, Sequelize);
 
 module.exports = db;

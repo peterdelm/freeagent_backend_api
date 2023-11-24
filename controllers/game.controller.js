@@ -1,6 +1,7 @@
 require("dotenv").config();
 const db = require("../models");
 const Game = db.games;
+const Task = db.tasks;
 const Player = db.players;
 const Op = db.Sequelize.Op;
 
@@ -102,6 +103,7 @@ exports.create = async (req, res) => {
       location: req.body.location,
       date: req.body.date,
       time: req.body.time,
+      sportId: req.body.sportId,
       game_length: req.body.game_length,
       calibre: req.body.calibre,
       game_type: req.body.game_type,
@@ -122,6 +124,18 @@ exports.create = async (req, res) => {
     };
     res.status(200).send(response);
     console.log("Game Added");
+
+    //Begin the process of finding a suitable player
+    //Create a task for finding a player
+    const task = {
+      gameId: newGame.id,
+      userId: userId,
+      status: "pending",
+    };
+
+    const newTask = await Task.create(task);
+
+    console.log("New Task Created: " + newTask);
 
     // err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
   } catch (err) {
