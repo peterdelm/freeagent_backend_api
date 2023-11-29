@@ -103,6 +103,7 @@ exports.create = async (req, res) => {
       location: req.body.location,
       date: req.body.date,
       time: req.body.time,
+      position: req.body.position,
       sportId: req.body.sportId,
       game_length: req.body.game_length,
       calibre: req.body.calibre,
