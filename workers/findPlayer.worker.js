@@ -149,6 +149,7 @@ async function processTask(task) {
 
     for (const player of playerOptions) {
       // Your code for each player goes here
+      //player.find
       // You can access player properties using 'player.propertyName'
       console.log("Player ID: " + player.id);
     }
