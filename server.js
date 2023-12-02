@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-// const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
+const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
 
 const app = express();
 

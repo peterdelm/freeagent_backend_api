@@ -7,8 +7,11 @@ module.exports = (sequelize, Sequelize) => {
       defaultValue: () => uuidv4(),
       primaryKey: true,
     },
-    taskInfo: {
+    taskType: {
       type: Sequelize.STRING,
+    },
+    taskInfo: {
+      type: Sequelize.JSON,
     },
     status: {
       type: Sequelize.STRING,

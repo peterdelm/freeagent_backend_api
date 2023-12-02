@@ -6,7 +6,6 @@ var sportsRouter = require("./routes/sports.routes");
 var usersRouter = require("./routes/sports.routes");
 var geocodingRouter = require("./routes/geocoding.routes");
 
-const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
 const express = require("express");
 const createError = require("http-errors");
 const path = require("path");

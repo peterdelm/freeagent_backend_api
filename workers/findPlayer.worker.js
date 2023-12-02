@@ -18,123 +18,126 @@ async function processTask(task) {
     //5. is_active == true
     //6. Range >= Distance from Player to Stadium
 
+    //create a failure/retry case for when there is no suitable Player found
+
     let playerOptions;
 
     if (
       // Case 1: All values are 'any'
-      game.gender === "any" &&
-      game.position === "any" &&
-      game.calibre === "any"
+      game.gender === "Any" &&
+      game.position === "Any" &&
+      game.calibre === "Any"
     ) {
       console.log("Testing Case 1");
 
       playerOptions = await Player.findAll({
-        where: { is_active: true, sportId: game.sportId },
+        where: { is_active: true, sport: game.sport },
       });
+      console.log("playerOptions are: " + playerOptions[0]);
     } else if (
       // Case 2: Gender and position are 'any', calibre is 'specific'
-      game.gender === "any" &&
-      game.position === "any" &&
-      game.calibre !== "any"
+      game.gender === "Any" &&
+      game.position === "Any" &&
+      game.calibre !== "Any"
     ) {
       console.log("Testing Case 2");
 
       playerOptions = await Player.findAll({
         where: {
           is_active: true,
-          sportId: game.sportId,
+          sport: game.sport,
           calibre: game.calibre,
         },
       });
     } else if (
       // Case 3: Calibre and gender are 'any', position is 'specific'
-      game.gender === "any" &&
-      game.position !== "any" &&
-      game.calibre === "any"
+      game.gender === "Any" &&
+      game.position !== "Any" &&
+      game.calibre === "Any"
     ) {
       console.log("Testing Case 3");
 
       playerOptions = await Player.findAll({
         where: {
           is_active: true,
-          sportId: game.sportId,
+          sport: game.sport,
           position: game.position,
         },
       });
     } else if (
       // Case 4: Position and Calibre are 'any', Gender is 'specific'
-      game.gender !== "any" &&
-      game.position === "any" &&
-      game.calibre === "any"
+      game.gender !== "Any" &&
+      game.position === "Any" &&
+      game.calibre === "Any"
     ) {
       console.log("Testing Case 4");
 
       playerOptions = await Player.findAll({
         where: {
           is_active: true,
-          sportId: game.sportId,
+          sport: game.sport,
           gender: game.gender,
         },
       });
     } else if (
       // Case 5: Gender is 'any', position and calibre are 'specific'
-      game.gender === "any" &&
-      game.position !== "any" &&
-      game.calibre !== "any"
+      game.gender === "Any" &&
+      game.position !== "Any" &&
+      game.calibre !== "Any"
     ) {
       console.log("Testing Case 5");
 
       playerOptions = await Player.findAll({
         where: {
           is_active: true,
-          sportId: game.sportId,
+          sport: game.sport,
           position: game.position,
           calibre: game.calibre,
         },
       });
     } else if (
       // Case 6:
-      game.gender !== "any" &&
-      game.position === "any" &&
-      game.calibre !== "any"
+      game.gender !== "Any" &&
+      game.position === "Any" &&
+      game.calibre !== "Any"
     ) {
       console.log("Testing Case 6");
 
       playerOptions = await Player.findAll({
         where: {
           is_active: true,
-          sportId: game.sportId,
+          sport: game.sport,
           gender: game.gender,
           calibre: game.calibre,
         },
       });
     } else if (
       // Case 7:
-      game.gender !== "any" &&
-      game.position !== "any" &&
-      game.calibre === "any"
+      game.gender !== "Any" &&
+      game.position !== "Any" &&
+      game.calibre === "Any"
     ) {
       console.log("Testing Case 7");
 
       playerOptions = await Player.findAll({
         where: {
           is_active: true,
-          sportId: game.sportId,
+          sport: game.sport,
           gender: game.gender,
           position: game.position,
         },
       });
     } else if (
       // Case 8: All values are 'specific'
-      game.gender !== "any" &&
-      game.position !== "any" &&
-      game.calibre !== "any"
+      game.gender != "Any" &&
+      game.position != "Any" &&
+      game.calibre != "Any"
     ) {
       console.log("Testing Case 8");
       playerOptions = await Player.findAll({
         where: {
           is_active: true,
-          sportId: game.sportId,
+          sport: game.sport,
           gender: game.gender,
           position: game.position,
           calibre: game.calibre,
@@ -144,6 +147,11 @@ async function processTask(task) {
 
     console.log("Player Found with ID: " + playerOptions[0].id);
 
+    for (const player of playerOptions) {
+      // Your code for each player goes here
+      // You can access player properties using 'player.propertyName'
+      console.log("Player ID: " + player.id);
+    }
     //Send the request to the suitable players
     //Await the response...
     //Upon response, kill the pending game
@@ -168,6 +176,7 @@ async function startWorker() {
     });
 
     if (task) {
+      console.log("Task with status 'pending' found ");
       // Lock the task to prevent other workers from processing it.
       await task.update({ status: "in-progress" });
       // Process the task.

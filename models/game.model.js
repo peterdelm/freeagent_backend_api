@@ -24,7 +24,7 @@ module.exports = (sequelize, Sequelize) => {
         msg: "Please enter a valid time",
       },
     },
-    sportId: {
+    sport: {
       type: Sequelize.STRING,
     },
     game_length: {
