@@ -7,17 +7,13 @@ module.exports = (sequelize, Sequelize) => {
       defaultValue: () => uuidv4(),
       primaryKey: true,
     },
-    potentialPlayerIds: {
-      type: Sequelize.ARRAY(Sequelize.UUID),
-    },
-    refusedPlayerIds: {
-      type: Sequelize.ARRAY(Sequelize.UUID),
-    },
-    acceptedPlayerIds: {
+    playerId: {
       type: Sequelize.UUID,
-    },
-    status: {
-      type: Sequelize.STRING,
+      references: {
+        model: "players", // This should match the table name of the User model
+        key: "id", // This should match the primary key of the User model
+      },
+      allowNull: false,
     },
     gameId: {
       type: Sequelize.UUID,
@@ -26,6 +22,14 @@ module.exports = (sequelize, Sequelize) => {
         key: "id", // This should match the primary key of the User model
       },
       allowNull: false,
+    },
+    status: {
+      type: Sequelize.STRING,
+      defaultValue: "active",
+    },
+    accepted: {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false,
     },
     createdAt: {
       type: Sequelize.DATE,
@@ -38,6 +42,11 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
   });
+
+  Invite.associate = (models) => {
+    Invite.belongsTo(models.Game, { foreignKey: "gameId" });
+    Invite.belongsTo(models.Player, { foreignKey: "playerId" });
+  };
 
   return Invite;
 };

@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
+const { Invites } = require("../models/invite.model");
 
 module.exports = (sequelize, Sequelize) => {
   const Player = sequelize.define("player", {
@@ -85,5 +86,9 @@ module.exports = (sequelize, Sequelize) => {
     },
   });
 
+  Player.associate = (models) => {
+    Player.belongsTo(models.User, { foreignKey: "userId" });
+    Player.hasMany(Invites, { foreignKey: "playerId" });
+  };
   return Player;
 };

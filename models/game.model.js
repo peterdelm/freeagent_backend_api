@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
+const { Invites } = require("../models/invite.model");
 
 module.exports = (sequelize, Sequelize) => {
   const Game = sequelize.define("game", {
@@ -6,6 +7,14 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.UUID,
       defaultValue: () => uuidv4(),
       primaryKey: true,
+    },
+    userId: {
+      type: Sequelize.UUID,
+      references: {
+        model: "users", // This should match the table name of the User model
+        key: "id", // This should match the primary key of the User model
+      },
+      allowNull: false,
     },
     location: {
       type: Sequelize.STRING,
@@ -48,14 +57,6 @@ module.exports = (sequelize, Sequelize) => {
     additional_info: {
       type: Sequelize.TEXT,
     },
-    userId: {
-      type: Sequelize.UUID,
-      references: {
-        model: "users", // This should match the table name of the User model
-        key: "id", // This should match the primary key of the User model
-      },
-      allowNull: false,
-    },
     is_active: {
       type: Sequelize.BOOLEAN,
     },
@@ -73,6 +74,7 @@ module.exports = (sequelize, Sequelize) => {
 
   Game.associate = (models) => {
     Game.belongsTo(models.User, { foreignKey: "userId" });
+    Game.hasMany(Invites, { foreignKey: "gameId" });
   };
 
   return Game;

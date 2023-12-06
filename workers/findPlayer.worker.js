@@ -2,6 +2,7 @@ const db = require("../models");
 const Task = db.tasks;
 const Game = db.games;
 const Player = db.players;
+const Invite = db.invites;
 
 async function processTask(task) {
   try {
@@ -148,10 +149,14 @@ async function processTask(task) {
     console.log("Player Found with ID: " + playerOptions[0].id);
 
     for (const player of playerOptions) {
-      // Your code for each player goes here
-      //player.find
-      // You can access player properties using 'player.propertyName'
+      inviteParams = {
+        playerId: player.id,
+        gameId: game.id,
+      };
+
+      const invite = await Invite.create(inviteParams);
       console.log("Player ID: " + player.id);
+      console.log("Invite ID: " + invite.id);
     }
     //Send the request to the suitable players
     //Await the response...
