@@ -88,7 +88,7 @@ module.exports = (sequelize, Sequelize) => {
 
   Player.associate = (models) => {
     Player.belongsTo(models.User, { foreignKey: "userId" });
-    Player.hasMany(Invites, { foreignKey: "playerId" });
+    Player.hasMany(models.Invites, { foreignKey: "playerId" });
   };
   return Player;
 };

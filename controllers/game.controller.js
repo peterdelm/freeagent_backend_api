@@ -2,17 +2,44 @@ require("dotenv").config();
 const db = require("../models");
 const Game = db.games;
 const Task = db.tasks;
+const User = db.users;
 const Player = db.players;
 const Op = db.Sequelize.Op;
 
 const helpers = require("./calculateDistance");
 
+authenticateUserToken = async (req) => {
+  const jwt = require("jsonwebtoken");
+  const secretKey = process.env.SECRET;
+  //FIND THE ID of the User
+  try {
+    // Ensure that the authorization header exists
+    if (!req.headers.authorization) {
+      console.log("Authorization header is missing");
+      return null;
+    }
+
+    // Extract the token from the authorization header
+    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+
+    // Decode and verify the JWT
+    const decoded = await jwt.verify(jwtFromHeader, secretKey);
+
+    // Extract the user ID from the decoded JWT payload
+    const userId = decoded.userID;
+    console.log("User ID is " + userId);
+
+    return userId;
+  } catch (err) {
+    console.error("JWT verification failed:", err.message);
+    return null;
+  }
+};
+
 // Create and Save a new Game
 exports.create = async (req, res) => {
   try {
     console.log("A create game request has arrived");
-    console.log("Location is " + req.headers);
-
     console.log("Location is " + req.body.location);
 
     // Validate request
@@ -29,7 +56,6 @@ exports.create = async (req, res) => {
     //FIND THE ID of the User
     console.log("Auth token is " + req.headers.authorization);
     const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-    console.log("jwtFromHeader is " + jwtFromHeader);
 
     // Decode and verify the JWT
     const userId = await jwt.verify(
@@ -285,7 +311,7 @@ exports.delete = (req, res) => {
 
 // Delete all Games from the database.
 exports.deleteAll = (req, res) => {
-  Games.destroy({
+  Game.destroy({
     where: {},
     truncate: false,
   })
@@ -299,53 +325,9 @@ exports.deleteAll = (req, res) => {
     });
 };
 
-// find all published Games
-exports.findAllPublished = (req, res) => {
-  Game.findAll({ where: { published: true } })
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving Games.",
-      });
-    });
-};
-
-//Find a player who meets the criteria
-exports.findTheRightPlayer = (req, res) => {
-  const game = {
-    location: req.body.location,
-    date: req.body.date,
-    time: req.body.time,
-    game_length: req.body.game_length,
-    calibre: req.body.calibre,
-    game_type: req.body.game_type,
-    gender: req.body.gender,
-    team_name: req.body.team_name,
-    additional_info: req.body.additional_info,
-  };
-
-  const gender = game.gender;
-  const calibre = game.calibre;
-  const game_type = game.game_type;
-
-  console.log("Request for players received");
-
-  const potential_players = Player.findAll({
-    where: { gender: gender, personal_calibre: calibre },
-    //where GAME_LOCATION to ADDRESS <= TRAVEL_RANGE (call this distanceBetween)
-  });
-
-  potential_players
-    .then((data) => {
-      res.send(data[0]); //sends the first player in the array
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while retrieving Games.",
-      });
-    });
-  //create game
-  //find player where: calibre, gender, gametype, sport
+exports.findAllGameInvites = async (req, res) => {
+  const userId = await authenticateUserToken(req);
+  const user = await User.findByPk(userId);
+  const players = await user.getPlayers();
+  console.log(players);
 };

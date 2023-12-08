@@ -10,10 +10,9 @@ module.exports = (app) => {
   router.get("/", games.findAll);
 
   // Retrieve all published Games
-  router.get("/published", games.findAllPublished);
-
-  // Retrieve all published Games
   router.get("/active", games.findAllActive);
+
+  router.get("/invites", games.findAllGameInvites);
 
   // Retrieve a single Games with id
   router.get("/:id", games.findOne);
@@ -26,8 +25,6 @@ module.exports = (app) => {
 
   // Delete all Games
   router.delete("/", games.deleteAll);
-
-  router.post("/find_a_player", games.findTheRightPlayer);
 
   app.use("/api/games", router);
 };
