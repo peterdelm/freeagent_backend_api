@@ -1,5 +1,5 @@
 require("dotenv").config();
-const axios = require('axios');
+const axios = require("axios");
 
 exports.autocomplete = async (req, res) => {
   const apiKey = process.env.GEOCODER_API_KEY;
@@ -29,19 +29,16 @@ exports.autocomplete = async (req, res) => {
       headers,
     };
 
-
     const response = await axios.get(url, { headers });
 
-
- 
     if (response.status !== 200) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
     const data = response.data;
-console.log("Data is: " + data.results[0].displayString)
+    console.log("Data is: " + data.results[0].displayString);
     let potentialMatches = [];
-  if (data.results && data.results.length > 0) {
+    if (data.results && data.results.length > 0) {
       potentialMatches = data.results.map((result) => result.displayString);
     }
 
