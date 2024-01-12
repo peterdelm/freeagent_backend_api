@@ -57,6 +57,10 @@ module.exports = (sequelize, Sequelize) => {
     additional_info: {
       type: Sequelize.TEXT,
     },
+    matchedPlayerId: {
+      type: Sequelize.UUID,
+      allowNull: true,
+    },
     is_active: {
       type: Sequelize.BOOLEAN,
     },

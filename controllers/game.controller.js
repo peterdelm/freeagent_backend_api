@@ -243,6 +243,44 @@ exports.findAllActive = async (req, res) => {
   }
 };
 
+// Retrieve all Active Games from the database.
+exports.findAllPending = async (req, res) => {
+  console.log("FindAll Pending Games Request Received");
+
+  try {
+    const userId = await authenticateUserToken(req);
+
+    //FIND ACTIVE GAMES BELONGING TO THE USER
+    try {
+      console.log("Finding active games for user " + userId + "...");
+      const activeGames = await Game.findAll({
+        where: { is_active: true, userId: userId, matchedPlayerId: null },
+      });
+      let message = "";
+      if (activeGames.length === 0) {
+        message = "No active games found.";
+      } else {
+        message = "Active games found.";
+      }
+      console.log("Active games are " + activeGames);
+
+      const response = {
+        success: true,
+        activeGames: activeGames,
+        message: message,
+      };
+      res.status(200).send(response);
+    } catch (err) {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving games.",
+      });
+    }
+  } catch (err) {
+    console.log("JWT verification failed");
+    res.status(401).send({ message: "Unauthorized" });
+  }
+};
+
 // Find a single Game with an id
 exports.findOne = (req, res) => {
   console.log("findOne game request received");

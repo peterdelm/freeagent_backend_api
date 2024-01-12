@@ -12,6 +12,8 @@ module.exports = (app) => {
   // Retrieve all published Games
   router.get("/active", games.findAllActive);
 
+  router.get("/pending", games.findAllPending);
+
   router.get("/invites", games.findAllGameInvites);
 
   // Retrieve a single Games with id
