@@ -193,5 +193,3 @@ async function startWorker() {
     }
   }
 }
-
-startWorker();

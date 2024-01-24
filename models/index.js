@@ -21,11 +21,12 @@ db.sequelize = sequelize;
 db.games = require("./game.model.js")(sequelize, Sequelize);
 db.players = require("./player.model.js")(sequelize, Sequelize);
 db.sports = require("./sport.model.js")(sequelize, Sequelize);
-db.tasks = require("./task.model.js")(sequelize, Sequelize);
 db.users = require("./user.model.js")(sequelize, Sequelize);
 db.invites = require("./invite.model.js")(sequelize, Sequelize);
-
-db.users.hasMany(db.players, { foreignKey: "userId" });
+db.conversations = require("./conversation.model.js")(sequelize, Sequelize);
+db.participants = require("./participant.model.js")(sequelize, Sequelize);
+db.messages = require("./message.model.js")(sequelize, Sequelize);
+db.tasks = require("./task.model.js")(sequelize, Sequelize);
 
 db.players.belongsTo(db.users, { foreignKey: "userId" });
 db.players.hasMany(db.invites, { foreignKey: "playerId" });
@@ -35,5 +36,24 @@ db.games.hasMany(db.invites, { foreignKey: "gameId" });
 
 db.invites.belongsTo(db.games, { foreignKey: "gameId" });
 db.invites.belongsTo(db.players, { foreignKey: "playerId" });
+
+db.users.hasMany(db.players, { foreignKey: "userId" });
+db.users.belongsToMany(db.conversations, {
+  through: db.participants,
+  foreignKey: "userId",
+  otherKey: "conversationId",
+});
+
+db.conversations.hasMany(db.participants, { foreignKey: "conversationId" });
+db.conversations.belongsToMany(db.users, {
+  through: db.participants,
+  foreignKey: "conversationId",
+  otherKey: "userId",
+});
+
+db.participants.belongsTo(db.users, { foreignKey: "userId" });
+db.participants.belongsTo(db.conversations, {
+  foreignKey: "conversationId",
+});
 
 module.exports = db;

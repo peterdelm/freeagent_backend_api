@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require("uuid");
-const { Players } = require("../models/player.model");
+const { Player } = require("../models/player.model");
+const { Participant } = require("../models/participant.model");
 
 module.exports = (sequelize, Sequelize) => {
   const User = sequelize.define("user", {
@@ -42,7 +43,14 @@ module.exports = (sequelize, Sequelize) => {
   });
 
   User.associate = (models) => {
-    User.hasMany(models.Players, { foreignKey: "userId" });
+    User.belongsToMany(models.Conversation, {
+      through: Participant,
+      foreignKey: "userId",
+      otherKey: "conversationId",
+    });
+
+    User.hasMany(Player, { foreignKey: "userId" });
+    User.hasMany(Message, { foreignKey: "senderId" });
   };
 
   return User;

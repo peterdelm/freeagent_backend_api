@@ -26,7 +26,7 @@ INSERT INTO sports (sport, game_length, game_type, calibre, position)
    VALUES ('Basketball', 
     '{60, 90, 120}',
    '{"5v5 (Outdoor)","5v5 (Indoor)","4v4 (Outdoor)","4v4 (Indoor)", "3v3 (Outdoor)","3v3 (Indoor)"}',
-   '{"Recreational", "Competitive", "Any"}','{"Any", "Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"}');
+   '{"Recreational", "Competitive", "Any"}','{"Any", "Poi   const user = await models.User.findByPk("10d605b6-d828-42cf-bf7d-2e81d8b89a89");nt Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"}');
 
    -- TASKS TABLE --
 
@@ -35,3 +35,13 @@ INSERT INTO sports (sport, game_length, game_type, calibre, position)
     '{60, 90, 120}',
    '{"5v5 (Outdoor)","5v5 (Indoor)","4v4 (Outdoor)","4v4 (Indoor)", "3v3 (Outdoor)","3v3 (Indoor)"}',
    '{"Recreational", "Competitive"}','{"Any", "Point Guard", "Shooting Guard", "Small Forward", "Power Forward", "Center"}');
+
+const userId = '8e2d5af2-3883-4649-a41c-e67b7f59deea'
+const db = require("./models");
+const User = db.users;
+const Conversation = db.conversations;
+
+const user = User.findByPk(userId);
+
+const conversation = Conversation.create({userId: userId});
+user.addConversation(conversation);
