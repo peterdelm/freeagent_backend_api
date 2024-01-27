@@ -3,6 +3,33 @@ const User = db.users;
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+const authenticateUserToken = async (req) => {
+  const jwt = require("jsonwebtoken");
+  const secretKey = process.env.SECRET;
+  //FIND THE ID of the User
+  try {
+    // Ensure that the authorization header exists
+    if (!req.headers.authorization) {
+      console.log("Authorization header is missing");
+      return null;
+    }
+
+    // Extract the token from the authorization header
+    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+
+    // Decode and verify the JWT
+    const decoded = await jwt.verify(jwtFromHeader, secretKey);
+
+    // Extract the user ID from the decoded JWT payload
+    const userId = decoded.userID;
+    console.log("User ID is " + userId);
+
+    return userId;
+  } catch (err) {
+    console.error("JWT verification failed:", err.message);
+    return null;
+  }
+};
 //generate a secure JWT (JSON Web Token)
 const generateToken = (userId) => {
   const secretKey = process.env.SECRET;
@@ -29,14 +56,6 @@ exports.findAll = (req, res) => {
         message: err.message || "Some error occurred while retrieving games.",
       });
     });
-};
-
-exports.retrieveToken = (req, res) => {
-  console.log("RetrieveUserToken Request Received");
-
-  res.send({
-    token: "test123",
-  });
 };
 
 exports.login = async (req, res) => {
@@ -87,7 +106,7 @@ exports.login = async (req, res) => {
 // Find a single Game with an id
 exports.findOne = (req, res) => {
   const id = req.params.id;
-
+  update;
   Game.findByPk(id)
     .then((data) => {
       res.send(data);
@@ -170,4 +189,53 @@ exports.create = async (req, res) => {
   }
 
   return;
+};
+
+exports.getCurrentUser = async (req, res) => {
+  console.log("getCurrentUser has been called");
+  const userId = await authenticateUserToken(req);
+
+  try {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    } else {
+      return res.json({ success: true, currentRole: user.currentRole });
+    }
+  } catch {
+    console.error("Error in switchProfile:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.switchProfile = async (req, res) => {
+  const userId = await authenticateUserToken(req);
+
+  try {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const prevProfile = user.currentRole;
+
+    if (prevProfile === "manager" || prevProfile === "player") {
+      console.log("A switchProfile request has been received");
+
+      const newProfile = prevProfile === "manager" ? "player" : "manager";
+      await User.update({ currentRole: newProfile }, { where: { id: userId } });
+
+      return res.json({ success: true, newProfile });
+    } else {
+      console.log("ERROR: toggleProfile request not sent");
+      console.log(prevProfile);
+
+      // Return the current profile to maintain the state
+      return res.json({ success: false, currentProfile: prevProfile });
+    }
+  } catch {
+    console.error("Error in switchProfile:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 };

@@ -4,9 +4,10 @@ module.exports = (app) => {
   var router = require("express").Router();
 
   // Retrieve all Sports
-  router.get("/", users.retrieveToken);
   router.post("/id", users.login);
   router.post("/", users.create);
+  router.put("/", users.switchProfile);
+  router.get("/", users.getCurrentUser);
 
   app.use("/api/users", router);
 };

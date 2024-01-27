@@ -30,6 +30,11 @@ module.exports = (sequelize, Sequelize) => {
     is_active: {
       type: Sequelize.BOOLEAN,
     },
+    currentRole: {
+      type: Sequelize.ENUM("player", "manager"),
+      allowNull: false,
+      defaultValue: "player",
+    },
     createdAt: {
       type: Sequelize.DATE,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
