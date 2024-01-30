@@ -1,15 +1,16 @@
 const { v4: uuidv4 } = require("uuid");
 const { Invites } = require("../models/invite.model");
+const { Sequelize, DataTypes } = require("sequelize");
 
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize) => {
   const Game = sequelize.define("game", {
     id: {
-      type: Sequelize.UUID,
+      type: DataTypes.UUID,
       defaultValue: () => uuidv4(),
       primaryKey: true,
     },
     userId: {
-      type: Sequelize.UUID,
+      type: DataTypes.UUID,
       references: {
         model: "users", // This should match the table name of the User model
         key: "id", // This should match the primary key of the User model
@@ -17,10 +18,10 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     location: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     date: {
-      type: Sequelize.DATEONLY,
+      type: DataTypes.DATE,
       validate: {
         isDate: {
           msg: "Please enter a valid date",
@@ -28,49 +29,52 @@ module.exports = (sequelize, Sequelize) => {
       },
     },
     time: {
-      type: Sequelize.TIME,
-      isDate: {
-        msg: "Please enter a valid time",
+      type: DataTypes.TIME,
+      validate: {
+        is: {
+          args: /^([01]\d|2[0-3]):([0-5]\d)$/,
+          msg: "Please enter a valid time",
+        },
       },
     },
     sport: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     game_length: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     calibre: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     game_type: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     gender: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     position: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     team_name: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     additional_info: {
-      type: Sequelize.TEXT,
+      type: DataTypes.TEXT,
     },
     matchedPlayerId: {
-      type: Sequelize.UUID,
+      type: DataTypes.UUID,
       allowNull: true,
     },
     is_active: {
-      type: Sequelize.BOOLEAN,
+      type: DataTypes.BOOLEAN,
     },
     createdAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       allowNull: false,
     },
     updatedAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       allowNull: false,
     },

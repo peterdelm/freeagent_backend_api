@@ -31,17 +31,21 @@ const authenticateUserToken = async (req) => {
   }
 };
 //generate a secure JWT (JSON Web Token)
-const generateToken = (userId) => {
-  const secretKey = process.env.SECRET;
-  console.log("generateToken called");
-  console.log(userId);
-  const payload = {
-    userID: userId,
-  };
+const generateToken = async (userId) => {
+  try {
+    const secretKey = process.env.SECRET;
+    console.log("generateToken called");
+    console.log(userId);
+    const payload = {
+      userID: userId,
+    };
 
-  const token = jwt.sign(payload, secretKey, { expiresIn: "24h" });
-  console.log(token);
-  return token;
+    const token = await jwt.sign(payload, secretKey, { expiresIn: "24h" });
+    console.log(token);
+    return token;
+  } catch (error) {
+    console.log("There was an error while generating the token");
+  }
 };
 
 // Retrieve all Users from the database.
@@ -72,35 +76,30 @@ exports.login = async (req, res) => {
       console.log("Not found!");
     } else {
       if (req.body.password === user.password) {
-        console.log(typeof req.body.password);
-        console.log(user instanceof User); // true
         console.log(user.email); // 'My Title'
-        console.log(typeof user.password); // 'My Title'
-        const token = generateToken(user.id);
+
+        const token = await generateToken(user.id);
+
+        const userData = { userId: user.id, currentRole: user.currentRole };
 
         res.status(200).send({
+          user: userData,
+          success: true,
           token: token,
         });
       } else {
-        console.log(typeof req.body.password);
-        console.log(user instanceof User); // true
         console.log(user.email); // 'My Title'
-        console.log(typeof user.password); // 'My Title'
         res.status(401).send({
           error: "Incorrect username/password",
         });
       }
     }
   } catch (err) {
-    // Handle any errors that occur during the asynchronous operation
     console.error(err);
     res.status(500).send({
       error: "Internal Server Error",
     });
   }
-
-  // Other code for password comparison and token generation should be added here
-  // ...
 };
 
 // Find a single Game with an id
@@ -120,27 +119,27 @@ exports.findOne = (req, res) => {
 
 // Create and Save a new User
 exports.create = async (req, res) => {
-  console.log("A 'Create User' request has arrived");
-  const { firstName, lastName, emailAddress, password } = req.body;
-
-  // Validate request
-  if (!firstName || !lastName || !emailAddress || !password) {
-    console.log("Some fields are empty");
-
-    res.status(400).send({
-      message: "All fields are required!",
-    });
-    return;
-  }
-
-  const user = {
-    first_name: firstName,
-    last_name: lastName,
-    email: emailAddress,
-    password: password,
-  };
-
   try {
+    console.log("A 'Create User' request has arrived");
+    const { firstName, lastName, emailAddress, password } = req.body;
+
+    // Validate request
+    if (!firstName || !lastName || !emailAddress || !password) {
+      console.log("Some fields are empty");
+      res.status(400).send({
+        message:
+          "All fields (firstName, lastName, emailAddress, password) are required!",
+      });
+      return;
+    }
+
+    const user = {
+      first_name: firstName,
+      last_name: lastName,
+      email: emailAddress,
+      password: password,
+    };
+
     const [result, created] = await User.findOrCreate({
       where: { email: user.email },
       defaults: {
@@ -151,44 +150,37 @@ exports.create = async (req, res) => {
         is_active: true,
       },
     });
+
     console.log("Result.created is " + created);
     console.log("Result.email is " + result.email);
-    if (result.email === user.email)
+
+    if (result.email === user.email) {
       if (created) {
         console.log("Result is " + result.id);
-
-        const token = generateToken(result.id);
+        const token = await generateToken(result.id);
+        console.log("Token at line 165 is : " + token);
         res.status(200).send({
           success: true,
           token: token,
         });
-
-        console.log("Line 90: " + req.body.firstName);
-        console.log("req.body is " + req.body);
-        console.log("req.headers is " + req.headers);
-        console.log("req.body.firstName is " + req.body.firstName);
       } else {
         console.log("Failure while creating an account");
         console.log("User with email " + user.email + " already exists.");
-        res.status(401).send({
+        res.status(409).send({
           success: false,
           message: "A user with that email already exists.",
         });
       }
-    else {
+    } else {
       console.log("Failure while creating an account");
     }
   } catch (err) {
     console.log("Problem with request");
-    console.log("err.name", err.name);
-    console.log("err.message", err.message);
-    console.log("err.errors", err.errors);
+    console.error("Error details:", err);
     res.status(500).send({
       message: err.message || "Some error occurred while creating the Game.",
     });
   }
-
-  return;
 };
 
 exports.getCurrentUser = async (req, res) => {

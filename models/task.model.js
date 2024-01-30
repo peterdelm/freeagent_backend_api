@@ -1,23 +1,24 @@
 const { v4: uuidv4 } = require("uuid");
+const { Sequelize, DataTypes } = require("sequelize");
 
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize) => {
   const Task = sequelize.define("task", {
     id: {
-      type: Sequelize.UUID,
+      type: DataTypes.UUID,
       defaultValue: () => uuidv4(),
       primaryKey: true,
     },
     taskType: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     taskInfo: {
-      type: Sequelize.JSON,
+      type: DataTypes.JSON,
     },
     status: {
-      type: Sequelize.STRING,
+      type: DataTypes.STRING,
     },
     userId: {
-      type: Sequelize.UUID,
+      type: DataTypes.UUID,
       references: {
         model: "users", // This should match the table name of the User model
         key: "id", // This should match the primary key of the User model
@@ -25,7 +26,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     gameId: {
-      type: Sequelize.UUID,
+      type: DataTypes.UUID,
       references: {
         model: "games", // This should match the table name of the User model
         key: "id", // This should match the primary key of the User model
@@ -33,12 +34,12 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     createdAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       allowNull: false,
     },
     updatedAt: {
-      type: Sequelize.DATE,
+      type: DataTypes.DATE,
       defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
       allowNull: false,
     },

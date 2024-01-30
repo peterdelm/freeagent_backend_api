@@ -120,7 +120,7 @@ exports.create = async (req, res) => {
       }
     };
 
-    getGeocode(address, apiKey);
+    // getGeocode(address, apiKey);
 
     ////////////PLACE GEOCODING CALL ABOVE////////////////////
 
@@ -140,6 +140,8 @@ exports.create = async (req, res) => {
       is_active: true,
       userId: userId,
     };
+
+    console.log("Game date is " + req.body.date);
 
     // Save Game in the database
     const newGame = await Game.create(game);
@@ -163,20 +165,25 @@ exports.create = async (req, res) => {
     const newTask = await Task.create(task);
 
     console.log("New Task Created: " + newTask);
-
-    // err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
   } catch (err) {
-    console.log(
-      "There was a problem in game creation, line 80. Error is " + err
-    );
-
-    console.log("Problem with request");
-    console.log("err.name", err.name);
-    console.log("err.message", err.message);
-    console.log("err.errors", err.errors);
-    res.status(500).send({
-      message: err.message || "Some error occurred while creating the Game.",
-    });
+    if (err.name === "SequelizeValidationError") {
+      // Handle validation errors
+      const validationErrors = err.errors.map((err) => ({
+        field: err.path,
+        message: err.message,
+      }));
+      res.status(400).json({
+        success: false,
+        errors: validationErrors,
+      });
+    } else {
+      // Handle other types of errors
+      console.error("Error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+      });
+    }
   }
 };
 
