@@ -5,7 +5,7 @@ const startWorker = require("./workers/findPlayer.worker.js"); // Import the wor
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:3001",
+  origin: "https://165.227.42.133:3001/",
 };
 
 app.use(cors(corsOptions));
