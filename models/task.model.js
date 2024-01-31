@@ -1,49 +1,34 @@
-const { v4: uuidv4 } = require("uuid");
-const { Sequelize, DataTypes } = require("sequelize");
-
-module.exports = (sequelize) => {
-  const Task = sequelize.define("task", {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: () => uuidv4(),
-      primaryKey: true,
-    },
-    taskType: {
-      type: DataTypes.STRING,
-    },
-    taskInfo: {
-      type: DataTypes.JSON,
-    },
-    status: {
-      type: DataTypes.STRING,
-    },
-    userId: {
-      type: DataTypes.UUID,
-      references: {
-        model: "users", // This should match the table name of the User model
-        key: "id", // This should match the primary key of the User model
+"use strict";
+const { Model } = require("sequelize");
+module.exports = (sequelize, DataTypes) => {
+  class Task extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
+      // define association here
+    }
+  }
+  Task.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
       },
-      allowNull: false,
+      taskType: DataTypes.STRING,
+      taskInfo: DataTypes.STRING,
+      status: DataTypes.STRING,
+      gameId: DataTypes.STRING,
     },
-    gameId: {
-      type: DataTypes.UUID,
-      references: {
-        model: "games", // This should match the table name of the User model
-        key: "id", // This should match the primary key of the User model
-      },
-      allowNull: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-      allowNull: false,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-      allowNull: false,
-    },
-  });
-
+    {
+      sequelize,
+      modelName: "Task",
+      timestamps: true, // Automatically adds createdAt and updatedAt columns
+      updatedAt: "updatedAt", // Customize the name of the updatedAt column if needed
+    }
+  );
   return Task;
 };

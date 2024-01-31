@@ -1,7 +1,9 @@
 {
-  "username": "localhost",
-  "password": "FromHell13!",
-  "database": "freeagent_database",
-  "host": "165.227.42.133",
-  "dialect": "postgres"
+  "development": {
+    "username": "peter",
+    "password": "sudo",
+    "database": "freeagent_database",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
 }
