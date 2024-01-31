@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "peter",
+    "password": "sudo",
+    "database": "freeagent_database",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}

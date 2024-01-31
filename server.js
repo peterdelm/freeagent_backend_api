@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
 
 const app = express();
 
@@ -25,10 +26,12 @@ db.sequelize
     console.log("Failed to sync db: " + err.message);
   });
 
-// // drop the table if it already exists
+// drop the table if it already exists
 // db.sequelize.sync({ force: true }).then(() => {
 //   console.log("Drop and re-sync db.");
 // });
+
+//start workers
 
 // simple route
 app.get("/", (req, res) => {
@@ -39,6 +42,8 @@ require("./routes/game.routes")(app);
 require("./routes/player.routes")(app);
 require("./routes/sport.routes")(app);
 require("./routes/user.routes")(app);
+require("./routes/geocoding.routes")(app);
+
 // set port, listen for requests
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

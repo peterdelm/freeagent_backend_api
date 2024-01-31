@@ -109,12 +109,8 @@ exports.findOne = (req, res) => {
 
 // Update a player by the id in the request
 exports.update = async (req, res) => {
-  console.log("Player.update called around 112");
-
   try {
     const playerId = req.params.id;
-
-    console.log("Req.body.position is " + req.body.position);
 
     //if the value of calibre, location, position, gender is blank, use the original value
     const { calibre, location, travelRange, gender, bio, position } = req.body;
@@ -124,12 +120,9 @@ exports.update = async (req, res) => {
       console.log("Player not found with id" + playerId);
       return res.status(404).json({ error: "Player not found." });
     }
-    console.log("Position is: " + position);
-
     //create an object to hold any changes
     const updates = {};
 
-    //check if calibre has been included in the object and that it is not "". if they have, add them to the updates object
     if (typeof calibre !== "undefined" && calibre.trim() !== "") {
       updates.calibre = calibre;
     }
@@ -148,30 +141,34 @@ exports.update = async (req, res) => {
     if (typeof position !== "undefined" && position.trim() !== "") {
       updates.position = position;
     }
-
-    console.log("Updates are " + updates.position);
-
-    Player.update(updates, {
-      where: { id: playerId },
-    })
-      .then((num) => {
-        if (num == 1) {
-          res.send({
-            success: true,
-            message: "player was updated successfully.",
-          });
-        } else {
-          console.log("Problem with player.update");
-          res.send({
-            message: `Cannot update player with id=${playerId}. Maybe player was not found or req.body is empty!`,
-          });
-        }
+    if (Object.keys(updates).length > 0) {
+      Player.update(updates, {
+        where: { id: playerId },
       })
-      .catch((err) => {
-        res.status(500).send({
-          message: "Error updating player with id=" + playerId,
+        .then((num) => {
+          if (num == 1) {
+            res.send({
+              success: true,
+              message: "player was updated successfully.",
+            });
+          } else {
+            console.log("Problem with player.update");
+            res.send({
+              message: `Cannot update player with id=${playerId}. Maybe player was not found or req.body is empty!`,
+            });
+          }
+        })
+        .catch((err) => {
+          res.status(500).send({
+            message: "Error updating player with id=" + playerId,
+          });
         });
+    } else {
+      res.send({
+        success: true,
+        message: "No Changes to Player Were Made",
       });
+    }
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error." });
