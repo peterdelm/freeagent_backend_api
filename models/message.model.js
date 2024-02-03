@@ -1,40 +1,39 @@
-const { v4: uuidv4 } = require("uuid");
+"use strict";
+const { Model } = require("sequelize");
+module.exports = (sequelize, DataTypes) => {
+  class Message extends Model {
+    static associate(models) {
+      Message.belongsTo(models.user, {
+        foreignKey: "userId",
+        as: "user",
+        allowNull: false,
+      });
+      Message.belongsTo(models.Conversation, {
+        foreignKey: "conversationId",
+        as: "conversation",
+        allowNull: false,
+      });
+    }
+  }
 
-module.exports = (sequelize, Sequelize) => {
-  const Message = sequelize.define("message", {
+  Message.init({
     id: {
-      type: Sequelize.UUID,
-      defaultValue: () => uuidv4(),
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     content: {
-      type: Sequelize.TEXT,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     senderId: {
-      type: Sequelize.UUID,
+      type: DataTypes.UUID,
       allowNull: false,
     },
     conversationId: {
-      type: Sequelize.UUID,
-      allowNull: false,
-    },
-    createdAt: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-      allowNull: false,
-    },
-    updatedAt: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      type: DataTypes.UUID,
       allowNull: false,
     },
   });
-
-  Message.associate = (models) => {
-    Message.belongsTo(models.User, { foreignKey: "senderId" });
-    Message.belongsTo(models.Conversation, { foreignKey: "conversationId" });
-  };
-
   return Message;
 };
