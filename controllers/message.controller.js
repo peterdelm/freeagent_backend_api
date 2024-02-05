@@ -134,13 +134,13 @@ exports.create = async (req, res) => {
       time: req.body.time,
       position: req.body.position,
       sport: req.body.sport,
-      game_length: req.body.game_length,
+      gameLength: req.body.gameLength,
       calibre: req.body.calibre,
-      game_type: req.body.game_type,
+      gameType: req.body.gameType,
       gender: req.body.gender,
-      team_name: req.body.team_name,
-      additional_info: req.body.additional_info,
-      is_active: true,
+      teamName: req.body.teamName,
+      additionalInfo: req.body.additionalInfo,
+      isActive: true,
       userId: userId,
     };
 

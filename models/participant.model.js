@@ -1,40 +1,46 @@
-const { v4: uuidv4 } = require("uuid");
-const { User } = require("./user.model");
-const { Conversation } = require("./conversation.model");
+"use strict";
+const { Model } = require("sequelize");
 
-module.exports = (sequelize, Sequelize) => {
-  const Participant = sequelize.define("participant", {
-    id: {
-      type: Sequelize.UUID,
-      defaultValue: () => uuidv4(),
-      primaryKey: true,
+module.exports = (sequelize, DataTypes) => {
+  class Participant extends Model {
+    static associate(models) {
+      Participant.belongsTo(models.User, {
+        foreignKey: "userId",
+        as: "user",
+        allowNull: false,
+        onDelete: "CASCADE",
+      });
+      Participant.belongsTo(models.Conversation, {
+        foreignKey: "conversationId",
+        as: "conversation",
+        allowNull: false,
+        onDelete: "CASCADE",
+      });
+    }
+  }
+  Participant.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+      },
+      userId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
+      conversationId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+      },
     },
-    userId: {
-      type: Sequelize.UUID,
-      allowNull: false,
-    },
-    conversationId: {
-      type: Sequelize.UUID,
-      allowNull: false,
-    },
-    createdAt: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-      allowNull: false,
-    },
-    updatedAt: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-      allowNull: false,
-    },
-  });
-
-  Participant.associate = (models) => {
-    Participant.belongsTo(User, { foreignKey: "userId" });
-    Participant.belongsTo(Conversation, {
-      foreignKey: "conversationId",
-    });
-  };
+    {
+      sequelize,
+      modelName: "Participant",
+      timestamps: true, // Automatically adds createdAt and updatedAt columns
+      updatedAt: "updatedAt", // Customize the name of the updatedAt column if needed
+    }
+  );
 
   return Participant;
 };

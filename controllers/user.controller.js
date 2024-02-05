@@ -134,8 +134,8 @@ exports.create = async (req, res) => {
     }
 
     const user = {
-      first_name: firstName,
-      last_name: lastName,
+      firstName: firstName,
+      lastName: lastName,
       email: emailAddress,
       password: password,
     };
@@ -143,11 +143,11 @@ exports.create = async (req, res) => {
     const [result, created] = await User.findOrCreate({
       where: { email: user.email },
       defaults: {
-        first_name: user.first_name,
-        last_name: user.last_name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         password: user.password,
-        is_active: true,
+        isActive: true,
       },
     });
 
