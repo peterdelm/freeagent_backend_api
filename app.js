@@ -5,6 +5,7 @@ var playersRouter = require("./routes/player.routes");
 var sportsRouter = require("./routes/sport.routes");
 var usersRouter = require("./routes/user.routes");
 var geocodingRouter = require("./routes/geocoding.routes");
+require("pg");
 
 const express = require("express");
 const createError = require("http-errors");
