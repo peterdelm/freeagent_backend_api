@@ -1,52 +1,53 @@
+"use strict";
 const { v4: uuidv4 } = require("uuid");
+const { Model } = require("sequelize");
 
-module.exports = (sequelize, Sequelize) => {
-  const Invite = sequelize.define("invite", {
-    id: {
-      type: Sequelize.UUID,
-      defaultValue: () => uuidv4(),
-      primaryKey: true,
-    },
-    playerId: {
-      type: Sequelize.UUID,
-      references: {
-        model: "players", // This should match the table name of the User model
-        key: "id", // This should match the primary key of the User model
+module.exports = (sequelize, DataTypes) => {
+  class Invite extends Model {
+    static associate = (models) => {
+      Invite.belongsTo(models.Game, { foreignKey: "gameId" });
+      Invite.belongsTo(models.Player, { foreignKey: "playerId" });
+    };
+  }
+  Invite.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        defaultValue: () => uuidv4(),
+        primaryKey: true,
       },
-      allowNull: false,
-    },
-    gameId: {
-      type: Sequelize.UUID,
-      references: {
-        model: "games", // This should match the table name of the User model
-        key: "id", // This should match the primary key of the User model
+      playerId: {
+        type: DataTypes.UUID,
+        references: {
+          model: "players", // This should match the table name of the User model
+          key: "id", // This should match the primary key of the User model
+        },
+        allowNull: false,
       },
-      allowNull: false,
+      gameId: {
+        type: DataTypes.UUID,
+        references: {
+          model: "games", // This should match the table name of the User model
+          key: "id", // This should match the primary key of the User model
+        },
+        allowNull: false,
+      },
+      status: {
+        type: DataTypes.STRING,
+        defaultValue: "active",
+      },
+      accepted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
-    status: {
-      type: Sequelize.STRING,
-      defaultValue: "active",
-    },
-    accepted: {
-      type: Sequelize.BOOLEAN,
-      defaultValue: false,
-    },
-    createdAt: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-      allowNull: false,
-    },
-    updatedAt: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-      allowNull: false,
-    },
-  });
-
-  Invite.associate = (models) => {
-    Invite.belongsTo(models.Game, { foreignKey: "gameId" });
-    Invite.belongsTo(models.Player, { foreignKey: "playerId" });
-  };
+    {
+      sequelize,
+      modelName: "Invite",
+      timestamps: true, // Automatically adds createdAt and updatedAt columns
+      updatedAt: "updatedAt", // Customize the name of the updatedAt column if needed
+    }
+  );
 
   return Invite;
 };
