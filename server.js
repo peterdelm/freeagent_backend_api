@@ -4,11 +4,22 @@ const cors = require("cors");
 
 const app = express();
 
-var corsOptions = {
-  origin: "https://165.227.42.133:3001/",
-};
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       // Check if the request comes from an allowed origin
+//       const allowedOrigins = ["*"];
+//       if (allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     // Add any other relevant options
+//   })
+// );
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 // parse requests of content-type - application/json
 app.use(express.json());
