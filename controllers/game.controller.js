@@ -137,11 +137,16 @@ exports.create = async (req, res) => {
       gender: req.body.gender,
       teamName: req.body.teamName,
       additionalInfo: req.body.additionalInfo,
-      is_active: true,
+      isActive: true,
       userId: userId,
     };
 
-    console.log("Game date is " + req.body.date);
+    console.log("Body values:");
+    Object.keys(game).forEach((key) => {
+      console.log(`${key}: ${game[key]}`);
+    });
+
+    console.log("Game date is " + userId);
 
     // Save Game in the database
     const newGame = await Game.create(game);
@@ -156,15 +161,23 @@ exports.create = async (req, res) => {
 
     //Begin the process of finding a suitable player
     //Create a task for finding a player
+
     const task = {
       gameId: newGame.id,
-      userId: userId,
       status: "pending",
     };
-
+    Object.keys(task).forEach((key) => {
+      console.log(`${key}: ${task[key]}`);
+    });
     const newTask = await Task.create(task);
+    // console.log("New Task Created: ", newTask); // Log the new task for debugging
 
-    console.log("New Task Created: " + newTask);
+    // If newTask is undefined or null, handle the error
+    if (!newTask) {
+      throw new Error("Failed to create a new task.");
+    } else {
+      console.log("Task Added");
+    }
   } catch (err) {
     if (err.name === "SequelizeValidationError") {
       // Handle validation errors
@@ -177,12 +190,11 @@ exports.create = async (req, res) => {
         errors: validationErrors,
       });
     } else {
-      // Handle other types of errors
-      console.error("Error:", error);
-      res.status(500).json({
-        success: false,
-        message: "Internal server error",
-      });
+      console.log(err);
+      // res.status(500).json({
+      //   success: false,
+      //   message: "Internal server error",
+      // });
     }
   }
 };
@@ -223,7 +235,7 @@ exports.findAllActive = async (req, res) => {
     try {
       console.log("Finding active games for user " + userId + "...");
       const activeGames = await Game.findAll({
-        where: { is_active: true, userId: userId },
+        where: { isActive: true, userId: userId },
       });
       let message = "";
       if (activeGames.length === 0) {

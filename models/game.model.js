@@ -59,6 +59,7 @@ module.exports = (sequelize, DataTypes) => {
       gameType: DataTypes.STRING,
       gender: DataTypes.STRING,
       position: DataTypes.STRING,
+      location: DataTypes.STRING,
       teamName: DataTypes.STRING,
       matchedPlayerId: DataTypes.UUID,
       isActive: DataTypes.BOOLEAN,
