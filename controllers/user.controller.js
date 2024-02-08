@@ -148,6 +148,7 @@ exports.create = async (req, res) => {
         email: user.email,
         password: user.password,
         isActive: true,
+        currentRole: "manager",
       },
     });
 

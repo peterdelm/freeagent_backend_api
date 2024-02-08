@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       taskType: DataTypes.STRING,
       taskInfo: DataTypes.STRING,
       status: DataTypes.STRING,
-      gameId: DataTypes.STRING,
+      gameId: DataTypes.UUID,
     },
     {
       sequelize,

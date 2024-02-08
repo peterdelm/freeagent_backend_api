@@ -8,7 +8,7 @@ const app = express();
 //   cors({
 //     origin: (origin, callback) => {
 //       // Check if the request comes from an allowed origin
-//       const allowedOrigins = ["*"];
+//       const allowedOrigins = ["*", "http://192.168.0.14:8081"];
 //       if (allowedOrigins.includes(origin)) {
 //         callback(null, true);
 //       } else {
