@@ -4,18 +4,25 @@ const cors = require("cors");
 
 const app = express();
 
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       // Check if the request comes from an allowed origin
+//       const allowedOrigins = "*";
+//       console.log("The incoming origin is :" + origin);
+//       if (allowedOrigins.includes(origin)) {
+//         callback(null, true);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     // Add any other relevant options
+//   })
+// );
+
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Check if the request comes from an allowed origin
-      const allowedOrigins = "*";
-      console.log("The incoming origin is :" + origin);
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true, // Allow all incoming requests
     // Add any other relevant options
   })
 );
