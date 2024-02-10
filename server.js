@@ -4,33 +4,34 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests without an Origin header
-      if (!origin) {
-        callback(null, true);
-      } else {
-        // Check if the request comes from an allowed origin
-        const allowedOrigins = "*";
-        console.log("The incoming origin is :" + origin);
-        if (allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
-        }
-      }
-    },
-    // Add any other relevant options
-  })
-);
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+//       // Allow requests without an Origin header
+//       if (!origin) {
+//         callback(null, true);
+//         console
+//       } else {
+//         // Check if the request comes from an allowed origin
+//         const allowedOrigins = "*";
+//         console.log("The incoming origin is :" + origin);
+//         if (allowedOrigins.includes(origin)) {
+//           callback(null, true);
+//         } else {
+//           callback(new Error("Not allowed by CORS"));
+//         }
+//       }
+//     },
+//     // Add any other relevant options
+//   })
+// );
 
 // const corsOptions = {
 //   origin: "*",
 //   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 // };
 
-// app.use(cors(corsOptions));
+// app.use(cors("*"));
 
 // parse requests of content-type - application/json
 app.use(express.json());
