@@ -8,7 +8,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       // Check if the request comes from an allowed origin
-      const allowedOrigins = ["*", "http://192.168.0.14:8081"];
+      const allowedOrigins = "*";
       console.log("The incoming origin is :" + origin);
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
