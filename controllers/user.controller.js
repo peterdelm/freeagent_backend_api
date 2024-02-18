@@ -2,6 +2,7 @@ const db = require("../models");
 const User = db.users;
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const passwordResetMailer = require("./nodemailer.helper.js");
 
 const authenticateUserToken = async (req) => {
   const jwt = require("jsonwebtoken");
@@ -230,5 +231,36 @@ exports.switchProfile = async (req, res) => {
   } catch {
     console.error("Error in switchProfile:", error);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const resetPasswordIfEmailFound = async (emailAddress) => {
+  // Find the user by email
+  const user = await User.findOne({
+    where: { email: emailAddress },
+  });
+  if (user) {
+    console.log("User found with email " + emailAddress);
+    passwordResetMailer.sendPasswordResetEmail(
+      "peterdelmastro@hotmail.com",
+      "token123"
+    );
+  } else {
+    console.log("User not found");
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    console.log(
+      "resetPassword request received with email:" + req.body.emailAddress
+    );
+    resetPasswordIfEmailFound(req.body.emailAddress);
+    return res.json({
+      status: 200,
+      message: "We have sent a reset link to your email",
+    });
+  } catch {
+    console.error("Error in resetPassword:", error);
   }
 };
