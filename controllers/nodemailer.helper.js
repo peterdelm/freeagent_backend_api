@@ -1,4 +1,8 @@
 const nodemailer = require("nodemailer");
+const schemeExpoGo = "exp://";
+const localIp = process.env.FRONTEND_BASE_IP;
+
+const expoGoLink = schemeExpoGo + localIp;
 
 // Create a Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -13,19 +17,20 @@ const transporter = nodemailer.createTransport({
 
 // Function to send password reset email
 exports.sendPasswordResetEmail = async (email, resetToken) => {
+  console.log("SendPasswordResetEmail reset token is " + resetToken);
   // Construct email message
   const message = {
     from: "freeagentapplications@gmail.com",
     to: email,
     subject: "Password Reset",
-    text: `Click the following link to reset your password: free_agent://reset?token=${resetToken}`,
-    html: `<p>Click the following link to reset your password: <a href="free_Agent://reset?token=${resetToken}">Reset Password</a></p>`,
+    text: `Click the following link to reset your password: free_agent://app/NewPasswordScreen`,
+    html: `<p>Click the following link to reset your password: <a href="http://192.168.0.14:3001/redirect-to-app.html?token=${resetToken}">Reset Password</a></p>`,
   };
 
   // Send email
   try {
     console.log("Password reset email sending...");
-
+    console.log("Expo Go link is " + expoGoLink);
     await transporter.sendMail(message);
     console.log("Password reset email sent successfully");
   } catch (error) {

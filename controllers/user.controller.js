@@ -241,9 +241,11 @@ const resetPasswordIfEmailFound = async (emailAddress) => {
   });
   if (user) {
     console.log("User found with email " + emailAddress);
+    const token = await generateToken(user.id);
+
     passwordResetMailer.sendPasswordResetEmail(
       "peterdelmastro@hotmail.com",
-      "token123"
+      token
     );
   } else {
     console.log("User not found");
@@ -259,6 +261,27 @@ exports.resetPassword = async (req, res) => {
     return res.json({
       status: 200,
       message: "We have sent a reset link to your email",
+    });
+  } catch {
+    console.error("Error in resetPassword:", error);
+  }
+};
+
+exports.setNewPassword = async (req, res) => {
+  try {
+    //check if the token is legit
+    const userId = await authenticateUserToken(req);
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userUpdate = await User.update(
+      { password: req.body.newPassword },
+      { where: { id: userId } }
+    );
+    return res.json({
+      status: 200,
+      message: "You have changed your password.",
     });
   } catch {
     console.error("Error in resetPassword:", error);
