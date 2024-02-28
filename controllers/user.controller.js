@@ -281,7 +281,7 @@ exports.setNewPassword = async (req, res) => {
     );
     return res.json({
       status: 200,
-      message: "You have changed your password.",
+      message: "You have successfully changed your password.",
     });
   } catch {
     console.error("Error in resetPassword:", error);

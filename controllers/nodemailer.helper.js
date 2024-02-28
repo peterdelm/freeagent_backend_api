@@ -24,7 +24,7 @@ exports.sendPasswordResetEmail = async (email, resetToken) => {
     to: email,
     subject: "Password Reset",
     text: `Click the following link to reset your password: free_agent://app/NewPasswordScreen`,
-    html: `<p>Click the following link to reset your password: <a href="http://192.168.0.14:3001/redirect-to-app.html?token=${resetToken}">Reset Password</a></p>`,
+    html: `<p>Click the following link to reset your password: <a href="http://192.168.2.43:3001/redirect-to-app.html?token=${resetToken}">Reset Password</a></p>`,
   };
 
   // Send email
