@@ -301,19 +301,42 @@ exports.findAllPending = async (req, res) => {
 };
 
 // Find a single Game with an id
-exports.findOne = (req, res) => {
-  console.log("findOne game request received");
-  const id = req.params.id;
+exports.findOne = async (req, res) => {
+  const gameId = req.params.id;
 
-  Game.findByPk(id)
-    .then((data) => {
-      res.send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error retrieving Game with id=" + id,
-      });
+  console.log("findOne game request received for game with ID: " + gameId);
+
+  const jwt = require("jsonwebtoken");
+  const secretKey = process.env.SECRET;
+
+  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+
+  // Decode and verify the JWT
+  const decoded = jwt.verify(jwtFromHeader, secretKey);
+  const userId = decoded.userID;
+
+  console.log("JWT verification succeeded. User ID is " + userId);
+
+  try {
+    const game = await Game.findByPk(gameId);
+    if (!game) {
+      message = "Game not found.";
+    } else {
+      message = "Game found.";
+      console.log("Game is " + game.date);
+
+      const response = {
+        success: true,
+        game: game,
+        message: message,
+      };
+      res.status(200).send(response);
+    }
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Some error occurred while retrieving game.",
     });
+  }
 };
 
 // Update a Game by the id in the request

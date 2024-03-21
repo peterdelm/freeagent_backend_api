@@ -243,10 +243,7 @@ const resetPasswordIfEmailFound = async (emailAddress) => {
     console.log("User found with email " + emailAddress);
     const token = await generateToken(user.id);
 
-    passwordResetMailer.sendPasswordResetEmail(
-      "peterdelmastro@hotmail.com",
-      token
-    );
+    passwordResetMailer.sendPasswordResetEmail(emailAddress, token);
   } else {
     console.log("User not found");
   }
