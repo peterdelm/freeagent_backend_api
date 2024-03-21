@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 // const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
+const path = require("path");
 
 const app = express();
 
@@ -38,6 +39,8 @@ app.use(express.json());
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static(path.join(__dirname, "public")));
 
 // drop the table if it already exists
 // db.sequelize.sync({ force: true }).then(() => {
