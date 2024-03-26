@@ -389,22 +389,6 @@ exports.delete = (req, res) => {
     });
 };
 
-// Delete all Games from the database.
-exports.deleteAll = (req, res) => {
-  Game.destroy({
-    where: {},
-    truncate: false,
-  })
-    .then((nums) => {
-      res.send({ message: `${nums} Games were deleted successfully!` });
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: err.message || "Some error occurred while removing all Games.",
-      });
-    });
-};
-
 exports.findAllGameInvites = async (req, res) => {
   const userId = await authenticateUserToken(req);
   const user = await User.findByPk(userId);

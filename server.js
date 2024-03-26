@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
-// const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
 const path = require("path");
+const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
 
 const app = express();
 
@@ -36,6 +36,7 @@ app.use(cors("*"));
 
 // parse requests of content-type - application/json
 app.use(express.json());
+//start workers
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
@@ -48,6 +49,9 @@ app.use(express.static(path.join(__dirname, "public")));
 // });
 
 //start workers
+startWorker().catch((error) => {
+  console.error("Error in startWorker:", error);
+});
 
 // simple route
 app.get("/", (req, res) => {

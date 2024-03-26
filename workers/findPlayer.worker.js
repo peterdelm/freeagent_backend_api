@@ -7,7 +7,7 @@ const Invite = db.invites;
 async function processTask(task) {
   try {
     //Assemble a list of suitable players
-    console.log("Processing Task...");
+    console.log("Processing Task with ID " + task.id);
     //Get the game associated with the task
     const game = await Game.findByPk(task.gameId);
 
@@ -176,20 +176,31 @@ async function processTask(task) {
 
 async function startWorker() {
   console.log("Starting Workers...");
-  while (true) {
-    const task = await Task.findOne({
-      where: { status: "pending" },
-    });
+  let running = true;
 
-    if (task) {
-      console.log("Task with status 'pending' found ");
-      // Lock the task to prevent other workers from processing it.
-      await task.update({ status: "in-progress" });
-      // Process the task.
-      await processTask(task);
-    } else {
-      // If no tasks are available, you can add a delay or implement polling logic.
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+  process.on("SIGINT", () => {
+    console.log("Shutting down worker...");
+    running = false;
+  });
+
+  while (running) {
+    try {
+      const task = await Task.findOne({
+        where: { status: "pending" },
+      });
+
+      if (task) {
+        console.log("Task with status 'pending' found ");
+        // Lock the task to prevent other workers from processing it.
+        await task.update({ status: "in-progress" });
+        // Process the task.
+        await processTask(task);
+      } else {
+        // If no tasks are available, you can add a delay or implement polling logic.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    } catch (error) {
+      console.error("Error occurred:", error.message);
     }
   }
 }
