@@ -10,18 +10,19 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
       },
-      taskType: {
-        type: Sequelize.STRING,
+      playerId: {
+        type: Sequelize.UUID,
       },
-      taskInfo: {
-        type: Sequelize.STRING,
+      gameId: {
+        type: Sequelize.UUID,
       },
       status: {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      gameId: {
-        type: Sequelize.UUID,
+      accepted: {
+        allowNull: false,
+        type: Sequelize.BOOLEAN,
       },
       createdAt: {
         type: Sequelize.DATE,

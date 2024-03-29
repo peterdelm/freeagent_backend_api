@@ -8,6 +8,8 @@ exports.create = async (req, res) => {
     console.log("A Create Player Request has arrived");
     // Validate request
     if (!req.body.location) {
+      console.log("address can not be empty!");
+
       res.status(400).send({
         messageOp: "address can not be empty!",
       });
@@ -43,12 +45,11 @@ exports.create = async (req, res) => {
       calibre: req.body.calibre,
       location: req.body.location,
       sport: req.body.sport,
-      sportId: req.body.sportId,
       travelRange: req.body.travelRange,
       position: req.body.position,
-      bio: req.body.bio,
+      bio: req.body.additionalInfo,
       userId: userId,
-      is_active: true,
+      isActive: true,
     };
     console.log(player);
 
@@ -67,8 +68,6 @@ exports.create = async (req, res) => {
     console.log("err.name", err.name);
     console.log("err.message", err.message);
     console.log("err.errors", err.errors);
-    //   err.errors.map((e) => console.log(e.message)); // The name must contain between 2 and 100 characters.
-
     res.status(500).send({
       message: err.message || "Some error occurred while creating the player.",
     });
@@ -109,6 +108,7 @@ exports.findOne = (req, res) => {
 
 // Update a player by the id in the request
 exports.update = async (req, res) => {
+  console.log("Player.update request received");
   try {
     const playerId = req.params.id;
 

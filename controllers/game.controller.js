@@ -390,6 +390,7 @@ exports.delete = (req, res) => {
 };
 
 exports.findAllGameInvites = async (req, res) => {
+  console.log("findAllGameInvites called...");
   const userId = await authenticateUserToken(req);
   const user = await User.findByPk(userId);
   const players = await user.getPlayers();

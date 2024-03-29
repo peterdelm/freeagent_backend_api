@@ -76,11 +76,12 @@ exports.findOne = (req, res) => {
 
   Sport.findByPk(id)
     .then((data) => {
+      console.log(data);
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving player with id=" + id,
+        message: "Error retrieving sport with id=" + id,
       });
     });
 };
