@@ -392,7 +392,43 @@ exports.delete = (req, res) => {
 exports.findAllGameInvites = async (req, res) => {
   console.log("findAllGameInvites called...");
   const userId = await authenticateUserToken(req);
-  const user = await User.findByPk(userId);
-  const players = await user.getPlayers();
-  console.log(players);
+  if (!userId) {
+    console.log("ERROR");
+  } else {
+    const user = await User.findByPk(userId);
+    const players = await user.getPlayers();
+
+    // const player = players[0];
+    // const invites = await player.getInvites();
+    // console.log("Invites are: ", invites);
+
+    // console.log("Profile 1 = ", players);
+
+    // const invites = await players[0].getInvites;
+    // For every player, fetch the invites associated with them
+    const invitesPromises = players.map((player) => player.getInvites());
+    const invitesArrays = await Promise.all(invitesPromises);
+
+    const invites = [].concat(...invitesArrays);
+
+    // Fetch all the games associated with the invites
+    const gamesPromises = invites.map((invite) => invite.getGame());
+    const games = await Promise.all(gamesPromises);
+
+    // Put them in an object, send them back
+    const result = games.map((game) => ({
+      game: game,
+      // Add other game properties as needed
+    }));
+
+    // // res.json(result);
+    // console.log("Active games are " + result.json);
+
+    console.log("Result is: ", result);
+    const response = {
+      success: true,
+      availableGames: result,
+    };
+    res.status(200).send(response);
+  }
 };
