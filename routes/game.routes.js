@@ -16,10 +16,14 @@ module.exports = (app) => {
 
   router.get("/invites", games.findAllGameInvites);
 
+  router.get("/acceptedplayerinvites", games.findAllAcceptedPlayerInvites);
+
   // Retrieve a single Games with id
   router.get("/:id", games.findOne);
+  // Update a Game
+  router.put("/joinGame", games.joinGame);
 
-  // Update a Games with id
+  // Update a Game with an i
   router.put("/:id", games.update);
 
   // Delete a Game with id

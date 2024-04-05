@@ -108,7 +108,7 @@ exports.findOne = (req, res) => {
 
 // Update a player by the id in the request
 exports.update = async (req, res) => {
-  console.log("Player.update request received");
+  console.log("Player.updaste request received");
   try {
     const playerId = req.params.id;
 

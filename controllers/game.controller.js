@@ -4,6 +4,8 @@ const Game = db.games;
 const Task = db.tasks;
 const User = db.users;
 const Player = db.players;
+const Invite = db.invites;
+
 const Op = db.Sequelize.Op;
 
 const helpers = require("./calculateDistance");
@@ -245,9 +247,19 @@ exports.findAllActive = async (req, res) => {
       }
       console.log("Active games are " + activeGames);
 
+      const result = activeGames
+        .map((game) => {
+          if (game) {
+            return {
+              game: game,
+            };
+          }
+        })
+        .filter((gameObj) => gameObj);
+
       const response = {
         success: true,
-        activeGames: activeGames,
+        availableGames: result,
         message: message,
       };
       res.status(200).send(response);
@@ -303,9 +315,6 @@ exports.findAllPending = async (req, res) => {
 // Find a single Game with an id
 exports.findOne = async (req, res) => {
   const gameId = req.params.id;
-
-  console.log("findOne game request received for game with ID: " + gameId);
-
   const jwt = require("jsonwebtoken");
   const secretKey = process.env.SECRET;
 
@@ -314,8 +323,6 @@ exports.findOne = async (req, res) => {
   // Decode and verify the JWT
   const decoded = jwt.verify(jwtFromHeader, secretKey);
   const userId = decoded.userID;
-
-  console.log("JWT verification succeeded. User ID is " + userId);
 
   try {
     const game = await Game.findByPk(gameId);
@@ -398,33 +405,144 @@ exports.findAllGameInvites = async (req, res) => {
     const user = await User.findByPk(userId);
     const players = await user.getPlayers();
 
-    // const player = players[0];
-    // const invites = await player.getInvites();
-    // console.log("Invites are: ", invites);
-
-    // console.log("Profile 1 = ", players);
-
-    // const invites = await players[0].getInvites;
-    // For every player, fetch the invites associated with them
     const invitesPromises = players.map((player) => player.getInvites());
     const invitesArrays = await Promise.all(invitesPromises);
 
     const invites = [].concat(...invitesArrays);
 
     // Fetch all the games associated with the invites
-    const gamesPromises = invites.map((invite) => invite.getGame());
+    const gamesPromises = invites.map(async (invite) => {
+      const game = await invite.getGame(); // Fetch the game
+      if (!game.matchedPlayerId) {
+        console.log(game.matchedPlayerId);
+        return game;
+      }
+    });
+
     const games = await Promise.all(gamesPromises);
 
-    // Put them in an object, send them back
-    const result = games.map((game) => ({
+    const result = games
+      .map((game) => {
+        if (game) {
+          return {
+            game: game,
+          };
+        }
+      })
+      .filter((gameObj) => gameObj);
+
+    const response = {
+      success: true,
+      availableGames: result,
+    };
+    res.status(200).send(response);
+  }
+};
+
+// Find a single Game with an id
+exports.joinGame = async (req, res) => {
+  console.log("Join game request received");
+
+  const jwt = require("jsonwebtoken");
+  const secretKey = process.env.SECRET;
+
+  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+
+  // Decode and verify the JWT
+  const decoded = jwt.verify(jwtFromHeader, secretKey);
+  const userId = decoded.userID;
+  console.log("User Id in joinGame request is: ", userId);
+
+  const gameId = req.body.gameId;
+
+  try {
+    // Check if gameId is provided
+    if (!gameId) {
+      return res.status(400).send({ message: "Game ID is required." });
+    }
+    // Check if game with provided gameId exists
+    const game = await Game.findByPk(gameId);
+    const user = await User.findByPk(userId);
+
+    if (!game) {
+      return res.status(404).send({ message: "Game not found." });
+    } else {
+      console.log(game);
+    }
+    // Do something with the game, e.g., join the game
+    const player = await Player.findOne({
+      where: { isActive: true, userId: userId, sport: game.sport },
+    });
+
+    if (!player) {
+      console.log("No Player Found");
+    } else {
+      const gameUpdates = { matchedPlayerId: player.id };
+      const inviteUpdates = { accepted: true };
+
+      const result = await Game.update(gameUpdates, {
+        where: { id: gameId },
+      });
+      const invite = await Invite.update(inviteUpdates, {
+        where: { playerId: player.id, gameId: gameId },
+      });
+      console.log(
+        `Attaching Player with ID ${player.id} to Game with ID ${gameId}`
+      );
+      console.log(`Marking Invite with ID ${invite.id} as 'true'`);
+      console.log(result);
+    }
+
+    // For now, just send a success response with the game object
+    const response = {
+      success: true,
       game: game,
-      // Add other game properties as needed
-    }));
+      message: "Game found.",
+    };
+    res.status(200).send(response);
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Some error occurred while retrieving game.",
+    });
+  }
+};
 
-    // // res.json(result);
-    // console.log("Active games are " + result.json);
+exports.findAllAcceptedPlayerInvites = async (req, res) => {
+  console.log("findAllGameInvites called...");
+  const userId = await authenticateUserToken(req);
+  if (!userId) {
+    console.log("ERROR");
+  } else {
+    const user = await User.findByPk(userId);
+    const players = await user.getPlayers();
 
-    console.log("Result is: ", result);
+    const invitesPromises = players.map((player) => player.getInvites());
+    const invitesArrays = await Promise.all(invitesPromises);
+
+    const invites = [].concat(...invitesArrays);
+
+    const acceptedInvites = invites.filter(
+      (invite) => invite.accepted === true && invite.status === "active"
+    );
+
+    // Fetch all the games associated with the invites
+    const gamesPromises = acceptedInvites.map(async (invite) => {
+      const game = await invite.getGame(); // Fetch the game
+      return game;
+    });
+
+    const games = await Promise.all(gamesPromises);
+
+    const result = games
+      .map((game) => {
+        if (game) {
+          return {
+            game: game,
+          };
+        }
+      })
+      .filter((gameObj) => gameObj);
+
     const response = {
       success: true,
       availableGames: result,
