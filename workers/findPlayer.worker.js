@@ -7,7 +7,7 @@ const Invite = db.invites;
 async function processTask(task) {
   try {
     //Assemble a list of suitable players
-    console.log("Processing Task...");
+    console.log("Processing Task with ID " + task.id);
     //Get the game associated with the task
     const game = await Game.findByPk(task.gameId);
 
@@ -16,7 +16,7 @@ async function processTask(task) {
     //2. Sport == Sport
     //3. Position == Position
     //4. Calibre == Calibre
-    //5. is_active == true
+    //5. isActive == true
     //6. Range >= Distance from Player to Stadium
 
     //create a failure/retry case for when there is no suitable Player found
@@ -30,11 +30,21 @@ async function processTask(task) {
       game.calibre === "Any"
     ) {
       console.log("Testing Case 1");
+      console.log(
+        "Gender: " + game.gender,
+        "Position: " + game.position,
+        "Calibre: " + game.calibre
+      );
 
       playerOptions = await Player.findAll({
-        where: { is_active: true, sport: game.sport },
+        where: { isActive: true, sport: game.sport },
       });
-      console.log("playerOptions are: " + playerOptions[0]);
+
+      if (playerOptions.length === 0) {
+        console.log("No players found for current criteria");
+      } else {
+        console.log("playerOptions are: ");
+      }
     } else if (
       // Case 2: Gender and position are 'any', calibre is 'specific'
       game.gender === "Any" &&
@@ -45,7 +55,7 @@ async function processTask(task) {
 
       playerOptions = await Player.findAll({
         where: {
-          is_active: true,
+          isActive: true,
           sport: game.sport,
           calibre: game.calibre,
         },
@@ -60,7 +70,7 @@ async function processTask(task) {
 
       playerOptions = await Player.findAll({
         where: {
-          is_active: true,
+          isActive: true,
           sport: game.sport,
           position: game.position,
         },
@@ -75,7 +85,7 @@ async function processTask(task) {
 
       playerOptions = await Player.findAll({
         where: {
-          is_active: true,
+          isActive: true,
           sport: game.sport,
           gender: game.gender,
         },
@@ -90,7 +100,7 @@ async function processTask(task) {
 
       playerOptions = await Player.findAll({
         where: {
-          is_active: true,
+          isActive: true,
           sport: game.sport,
           position: game.position,
           calibre: game.calibre,
@@ -106,7 +116,7 @@ async function processTask(task) {
 
       playerOptions = await Player.findAll({
         where: {
-          is_active: true,
+          isActive: true,
           sport: game.sport,
           gender: game.gender,
           calibre: game.calibre,
@@ -122,7 +132,7 @@ async function processTask(task) {
 
       playerOptions = await Player.findAll({
         where: {
-          is_active: true,
+          isActive: true,
           sport: game.sport,
           gender: game.gender,
           position: game.position,
@@ -137,13 +147,15 @@ async function processTask(task) {
       console.log("Testing Case 8");
       playerOptions = await Player.findAll({
         where: {
-          is_active: true,
+          isActive: true,
           sport: game.sport,
           gender: game.gender,
           position: game.position,
           calibre: game.calibre,
         },
       });
+    } else {
+      console.log("No Player Found for Current Criteria");
     }
 
     console.log("Player Found with ID: " + playerOptions[0].id);
@@ -171,25 +183,49 @@ async function processTask(task) {
   } catch (error) {
     // Handle errors and update the task's status to indicate failure.
     await task.update({ status: "failed", error: error.message });
+    console.error("Error occurred while finding players:", error);
   }
 }
 
 async function startWorker() {
   console.log("Starting Workers...");
-  while (true) {
-    const task = await Task.findOne({
-      where: { status: "pending" },
-    });
+  let running = true;
 
-    if (task) {
-      console.log("Task with status 'pending' found ");
-      // Lock the task to prevent other workers from processing it.
-      await task.update({ status: "in-progress" });
-      // Process the task.
-      await processTask(task);
-    } else {
-      // If no tasks are available, you can add a delay or implement polling logic.
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+  process.on("SIGINT", async () => {
+    console.log("Shutting down worker...");
+    running = false;
+
+    // Wait for any ongoing tasks to complete gracefully
+    // For example, you could wait for the current task to finish processing
+    // before allowing the shutdown to complete
+    // This is just an example and you may need to adjust it based on your actual implementation
+    // if (currentTask) {
+    //   await currentTask;
+    // }
+
+    process.exit(0); // Exit the process
+  });
+
+  while (running) {
+    try {
+      const task = await Task.findOne({
+        where: { status: "pending" },
+      });
+
+      if (task) {
+        console.log("Task with status 'pending' found ");
+        // Lock the task to prevent other workers from processing it.
+        await task.update({ status: "in-progress" });
+        // Process the task.
+        await processTask(task);
+      } else {
+        // If no tasks are available, you can add a delay or implement polling logic.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    } catch (error) {
+      console.error("Error occurred:", error.message);
     }
   }
 }
+
+module.exports = { startWorker };
