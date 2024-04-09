@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Redirecting...</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsonwebtoken@9.0.2"></script>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("token");
+
+      window.location.replace(
+        `exp://192.168.0.14:8081/--/NewPasswordScreen?token=${token}`
+      );
+    </script>
+  </head>
+  <body>
+    <p>
+      If you are not redirected, pleaaaase
+      <a href="myapp://openPage?pageId=123">click here</a>.
+    </p>
+  </body>
+</html>
