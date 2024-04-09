@@ -1,31 +1,47 @@
 const express = require("express");
 const cors = require("cors");
-// const startWorker = require("./workers/findPlayer.worker.js"); // Import the worker module
+const path = require("path");
+const { startWorker } = require("./workers/findPlayer.worker.js"); // Import the worker module
 
 const app = express();
 
 // app.use(
 //   cors({
 //     origin: (origin, callback) => {
-//       // Check if the request comes from an allowed origin
-//       const allowedOrigins = ["*", "http://192.168.0.14:8081"];
-//       if (allowedOrigins.includes(origin)) {
+//       // Allow requests without an Origin header
+//       if (!origin) {
 //         callback(null, true);
+//         console
 //       } else {
-//         callback(new Error("Not allowed by CORS"));
+//         // Check if the request comes from an allowed origin
+//         const allowedOrigins = "*";
+//         console.log("The incoming origin is :" + origin);
+//         if (allowedOrigins.includes(origin)) {
+//           callback(null, true);
+//         } else {
+//           callback(new Error("Not allowed by CORS"));
+//         }
 //       }
 //     },
 //     // Add any other relevant options
 //   })
 // );
 
-app.use(cors());
+// const corsOptions = {
+//   origin: "*",
+//   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+// };
+
+app.use(cors("*"));
 
 // parse requests of content-type - application/json
 app.use(express.json());
+//start workers
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+
+app.use(express.static(path.join(__dirname, "public")));
 
 // drop the table if it already exists
 // db.sequelize.sync({ force: true }).then(() => {
@@ -33,6 +49,9 @@ app.use(express.urlencoded({ extended: true }));
 // });
 
 //start workers
+startWorker().catch((error) => {
+  console.error("Error in startWorker:", error);
+});
 
 // simple route
 app.get("/", (req, res) => {

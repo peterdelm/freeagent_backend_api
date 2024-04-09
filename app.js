@@ -55,10 +55,10 @@ app.set("view engine", "ejs"); // Replace 'ejs' with your chosen view engine
 // Specify the directory where your views are located
 app.set("views", path.join(__dirname, "views")); // Replace 'views' with your actual views directory
 
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-app.use(express.static(path.join(__dirname, "public")));
+console.log("Dirname is: " + __dirname);
 
 app.use("/", indexRouter);
 app.use("/games", gamesRouter);

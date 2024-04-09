@@ -71,17 +71,17 @@ exports.create = (req, res) => {
 
 // Find a single Sport with an id
 exports.findOne = (req, res) => {
-  console.log("Sports.findOne Called")
+  console.log("Sports.findOne Called");
   const id = req.params.id;
 
   Sport.findByPk(id)
     .then((data) => {
+      console.log(data);
       res.send(data);
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving player with id=" + id,
+        message: "Error retrieving sport with id=" + id,
       });
     });
 };
-
