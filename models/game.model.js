@@ -19,6 +19,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "gameId",
         as: "Invites",
       });
+
+      Game.hasOne(models.Location, {
+        foreignKey: "gameId",
+        as: "Locations",
+        onDelete: "CASCADE",
+      });
     }
   }
   Game.init(
