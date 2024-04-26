@@ -3,7 +3,7 @@ const axios = require("axios");
 const dbConfig = require("../config/db.config.js");
 
 exports.autocomplete = async (req, res) => {
-  const apiKey = process.env.GEOCODER_API_KEY;
+  const apiKey = dbConfig.GEOCODER_API_KEY;
   console.log("Current text is: " + req.body.addressFragment);
 
   try {
