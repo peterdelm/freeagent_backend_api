@@ -5,10 +5,42 @@ const Task = db.tasks;
 const User = db.users;
 const Player = db.players;
 const Invite = db.invites;
+const Location = db.locations;
 
 const Op = db.Sequelize.Op;
 
 const helpers = require("./calculateDistance");
+
+const createLocation = async (locationString) => {
+  async function getCoordinates(locationString) {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          locationString
+        )}&key=AIzaSyDbPFYhBsYTcD_ala9nEOjlM_bkFyALMuI`
+      );
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const { lat, lng } = data.results[0].geometry.location;
+        return { latitude: lat, longitude: lng };
+      }
+    } catch (error) {
+      console.error("Error fetching coordinates:", error);
+    }
+
+    return null;
+  }
+
+  getCoordinates(locationString).then((coordinates) => {
+    if (coordinates) {
+      console.log("Latitude:", coordinates.latitude);
+      console.log("Longitude:", coordinates.longitude);
+    } else {
+      console.log("Coordinates not found.");
+    }
+  });
+};
 
 authenticateUserToken = async (req) => {
   const jwt = require("jsonwebtoken");
@@ -149,7 +181,7 @@ exports.create = async (req, res) => {
     });
 
     console.log("Game date is " + userId);
-
+    createLocation(game.location);
     // Save Game in the database
     const newGame = await Game.create(game);
 
