@@ -1,5 +1,6 @@
 require("dotenv").config();
 const axios = require("axios");
+const dbConfig = require("../config/db.config.js");
 
 exports.autocomplete = async (req, res) => {
   const apiKey = process.env.GEOCODER_API_KEY;
@@ -9,7 +10,7 @@ exports.autocomplete = async (req, res) => {
     console.log("Address Autocomplete has been called");
 
     // fetch the addresses from mapquest      console.log("getGeocode has been called.");
-    const baseUrl = process.env.ADDRESS_AUTOCOMPLETE_URL;
+    const baseUrl = dbConfig.ADDRESS_AUTOCOMPLETE_URL;
     console.log(" Base Geocoder URL is: " + baseUrl);
 
     const queryParams = {
