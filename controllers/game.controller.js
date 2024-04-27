@@ -62,8 +62,8 @@ const createNewLocation = async (gameId, coordinates, locationString) => {
 
   const locationInfo = {
     gameId: gameId,
-    longitude: coordinates.latitude,
-    latitude: coordinates.longitude,
+    longitude: coordinates.longitude,
+    latitude: coordinates.latitude,
     address: locationString,
   };
   console.log("locationInfo is", locationInfo);
@@ -481,7 +481,7 @@ exports.findAllGameInvites = async (req, res) => {
     // Fetch all the games associated with the invites
     const gamesPromises = invites.map(async (invite) => {
       const game = await invite.getGame(); // Fetch the game
-      if (!game.matchedPlayerId) {
+      if (game && !game.matchedPlayerId) {
         console.log(game.matchedPlayerId);
         return game;
       }
@@ -489,20 +489,43 @@ exports.findAllGameInvites = async (req, res) => {
 
     const games = await Promise.all(gamesPromises);
 
+    const locationsPromises = games
+      .filter((game) => !!game) // Filter out undefined games
+      .map(async (game) => {
+        const location = await game.getLocation(); // Fetch the location
+        return location;
+      });
+
+    const locations = await Promise.all(locationsPromises);
+
     const result = games
-      .map((game) => {
-        if (game) {
-          return {
-            game: game,
-          };
-        }
-      })
-      .filter((gameObj) => gameObj);
+      .filter((game) => !!game) // Filter out undefined games
+      .map((game, index) => ({
+        game: {
+          id: game.id,
+          date: game.date,
+          sport: game.sport,
+          location: game.location,
+          matchedPlayerId: game.matchedPlayerId,
+          position: game.position,
+          calibre: game.calibre,
+          gender: game.gender,
+          gameType: game.gameType,
+          gameLength: game.gameLength,
+          geocoordinates: locations[index] || "", // Use the corresponding location
+        },
+      }));
 
     const response = {
       success: true,
       availableGames: result,
     };
+    const lastElement = response.availableGames.length - 1;
+    const longitude =
+      response.availableGames[lastElement].game.geocoordinates.dataValues
+        .longitude;
+
+    console.log(longitude);
     res.status(200).send(response);
   }
 };
