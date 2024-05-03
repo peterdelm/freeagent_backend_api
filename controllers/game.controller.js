@@ -504,6 +504,7 @@ exports.findAllGameInvites = async (req, res) => {
         game: {
           id: game.id,
           date: game.date,
+          time: game.time,
           sport: game.sport,
           location: game.location,
           matchedPlayerId: game.matchedPlayerId,
