@@ -11,35 +11,71 @@ const Op = db.Sequelize.Op;
 
 const helpers = require("./calculateDistance");
 
-const createLocation = async (locationString) => {
-  async function getCoordinates(locationString) {
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
-          locationString
-        )}&key=AIzaSyDbPFYhBsYTcD_ala9nEOjlM_bkFyALMuI`
-      );
-      const data = await response.json();
+const createLocation = async (locationString, gameId) => {
+  console.log("Calling createLocation");
 
-      if (data.results && data.results.length > 0) {
-        const { lat, lng } = data.results[0].geometry.location;
-        return { latitude: lat, longitude: lng };
-      }
-    } catch (error) {
-      console.error("Error fetching coordinates:", error);
-    }
+  try {
+    const coordinates = await getCoordinates(locationString);
+    console.log("Calling getCoordinates");
 
-    return null;
-  }
-
-  getCoordinates(locationString).then((coordinates) => {
     if (coordinates) {
       console.log("Latitude:", coordinates.latitude);
       console.log("Longitude:", coordinates.longitude);
+      const newLocation = await createNewLocation(
+        gameId,
+        coordinates,
+        locationString
+      );
+      return newLocation;
     } else {
       console.log("Coordinates not found.");
     }
-  });
+  } catch (error) {
+    console.error("Error creating location:", error);
+  }
+};
+
+const getCoordinates = async (locationString) => {
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+        locationString
+      )}&key=AIzaSyDbPFYhBsYTcD_ala9nEOjlM_bkFyALMuI`
+    );
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      const { lat, lng } = data.results[0].geometry.location;
+      return { latitude: lat, longitude: lng };
+    }
+  } catch (error) {
+    console.error("Error fetching coordinates:", error);
+    throw new Error("Failed to fetch coordinates.");
+  }
+
+  return null;
+};
+
+const createNewLocation = async (gameId, coordinates, locationString) => {
+  console.log("Calling createNewLocation");
+  console.log("gameId is:", gameId);
+
+  const locationInfo = {
+    gameId: gameId,
+    longitude: coordinates.longitude,
+    latitude: coordinates.latitude,
+    address: locationString,
+  };
+  console.log("locationInfo is", locationInfo);
+
+  try {
+    const newLocation = await Location.create(locationInfo);
+    console.log("Location created:", newLocation);
+
+    return newLocation;
+  } catch (error) {
+    console.error("Error creating location:", error.message);
+  }
 };
 
 authenticateUserToken = async (req) => {
@@ -175,15 +211,15 @@ exports.create = async (req, res) => {
       userId: userId,
     };
 
-    console.log("Body values:");
     Object.keys(game).forEach((key) => {
       console.log(`${key}: ${game[key]}`);
     });
 
-    console.log("Game date is " + userId);
-    createLocation(game.location);
     // Save Game in the database
     const newGame = await Game.create(game);
+    const newLocation = await createLocation(game.location, newGame.id);
+
+    console.log("New location ID is:", newLocation.id);
 
     const response = {
       success: true, // Set the success property to true
@@ -445,7 +481,7 @@ exports.findAllGameInvites = async (req, res) => {
     // Fetch all the games associated with the invites
     const gamesPromises = invites.map(async (invite) => {
       const game = await invite.getGame(); // Fetch the game
-      if (!game.matchedPlayerId) {
+      if (game && !game.matchedPlayerId) {
         console.log(game.matchedPlayerId);
         return game;
       }
@@ -453,20 +489,44 @@ exports.findAllGameInvites = async (req, res) => {
 
     const games = await Promise.all(gamesPromises);
 
+    const locationsPromises = games
+      .filter((game) => !!game) // Filter out undefined games
+      .map(async (game) => {
+        const location = await game.getLocation(); // Fetch the location
+        return location;
+      });
+
+    const locations = await Promise.all(locationsPromises);
+
     const result = games
-      .map((game) => {
-        if (game) {
-          return {
-            game: game,
-          };
-        }
-      })
-      .filter((gameObj) => gameObj);
+      .filter((game) => !!game) // Filter out undefined games
+      .map((game, index) => ({
+        game: {
+          id: game.id,
+          date: game.date,
+          time: game.time,
+          sport: game.sport,
+          location: game.location,
+          matchedPlayerId: game.matchedPlayerId,
+          position: game.position,
+          calibre: game.calibre,
+          gender: game.gender,
+          gameType: game.gameType,
+          gameLength: game.gameLength,
+          geocoordinates: locations[index] || "", // Use the corresponding location
+        },
+      }));
 
     const response = {
       success: true,
       availableGames: result,
     };
+    const lastElement = response.availableGames.length - 1;
+    const longitude =
+      response.availableGames[lastElement].game.geocoordinates.dataValues
+        .longitude;
+
+    console.log(longitude);
     res.status(200).send(response);
   }
 };

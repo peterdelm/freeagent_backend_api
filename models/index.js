@@ -29,7 +29,7 @@ db.conversations = require("./conversation.model.js")(sequelize, Sequelize);
 db.participants = require("./participant.model.js")(sequelize, Sequelize);
 db.messages = require("./message.model.js")(sequelize, Sequelize);
 db.tasks = require("./task.model.js")(sequelize, Sequelize);
-db.locations = require("./task.model.js")(sequelize, Sequelize);
+db.locations = require("./location.model.js")(sequelize, Sequelize);
 
 db.players.belongsTo(db.users, { foreignKey: "userId" });
 db.players.hasMany(db.invites, { foreignKey: "playerId" });
