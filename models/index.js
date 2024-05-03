@@ -29,12 +29,14 @@ db.conversations = require("./conversation.model.js")(sequelize, Sequelize);
 db.participants = require("./participant.model.js")(sequelize, Sequelize);
 db.messages = require("./message.model.js")(sequelize, Sequelize);
 db.tasks = require("./task.model.js")(sequelize, Sequelize);
+db.locations = require("./location.model.js")(sequelize, Sequelize);
 
 db.players.belongsTo(db.users, { foreignKey: "userId" });
 db.players.hasMany(db.invites, { foreignKey: "playerId" });
 
 db.games.belongsTo(db.users, { foreignKey: "userId" });
 db.games.hasMany(db.invites, { foreignKey: "gameId" });
+db.games.hasOne(db.locations, { foreignKey: "gameId" });
 
 db.invites.belongsTo(db.games, { foreignKey: "gameId" });
 db.invites.belongsTo(db.players, { foreignKey: "playerId" });
