@@ -2,4 +2,6 @@ node_modules
 package-lock.json
 .env
 /config/
+config.json
+db.config.js
 
