@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   class Location extends Model {
     static associate = (models) => {
       Location.belongsTo(models.Game, { foreignKey: "gameId" });
+      Location.belongsTo(models.Player, { foreignKey: "playerId" });
     };
   }
   Location.init(
@@ -16,10 +17,18 @@ module.exports = (sequelize, DataTypes) => {
       gameId: {
         type: DataTypes.UUID,
         references: {
-          model: "games", // This should match the table name of the User model
-          key: "id", // This should match the primary key of the User model
+          model: "games",
+          key: "id",
         },
-        allowNull: false,
+        allowNull: true,
+      },
+      playerId: {
+        type: DataTypes.UUID,
+        references: {
+          model: "players",
+          key: "id",
+        },
+        allowNull: true,
       },
       longitude: {
         type: DataTypes.DOUBLE,

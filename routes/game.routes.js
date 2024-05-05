@@ -23,6 +23,8 @@ module.exports = (app) => {
   // Update a Game
   router.put("/joinGame", games.joinGame);
 
+  router.put("/quitGame", games.quitGame);
+
   // Update a Game with an i
   router.put("/:id", games.update);
 

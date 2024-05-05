@@ -521,12 +521,7 @@ exports.findAllGameInvites = async (req, res) => {
       success: true,
       availableGames: result,
     };
-    const lastElement = response.availableGames.length - 1;
-    const longitude =
-      response.availableGames[lastElement].game.geocoordinates.dataValues
-        .longitude;
 
-    console.log(longitude);
     res.status(200).send(response);
   }
 };
@@ -599,6 +594,73 @@ exports.joinGame = async (req, res) => {
   }
 };
 
+exports.quitGame = async (req, res) => {
+  console.log("Quit game request received");
+
+  const jwt = require("jsonwebtoken");
+  const secretKey = process.env.SECRET;
+
+  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+
+  // Decode and verify the JWT
+  const decoded = jwt.verify(jwtFromHeader, secretKey);
+  const userId = decoded.userID;
+  console.log("User Id in quitGame request is: ", userId);
+
+  const gameId = req.body.gameId;
+
+  try {
+    // Check if gameId is provided
+    if (!gameId) {
+      return res.status(400).send({ message: "Game ID is required." });
+    }
+    // Check if game with provided gameId exists
+    const game = await Game.findByPk(gameId);
+
+    if (!game) {
+      return res.status(404).send({ message: "Game not found." });
+    } else {
+      console.log(game);
+    }
+
+    const player = await Player.findOne({
+      where: { isActive: true, userId: userId, sport: game.sport },
+    });
+
+    if (!player) {
+      console.log("No Player Found");
+    } else {
+      const gameUpdates = { matchedPlayerId: null };
+      const inviteUpdates = { accepted: false };
+
+      const result = await Game.update(gameUpdates, {
+        where: { id: gameId },
+      });
+      const invite = await Invite.update(inviteUpdates, {
+        where: { playerId: player.id, gameId: gameId },
+      });
+      console.log(
+        `Removing Player with ID ${player.id} to Game with ID ${gameId}`
+      );
+      console.log(`Marking Invite with ID ${invite.id} as 'false'`);
+      console.log(result);
+    }
+
+    // For now, just send a success response with the game object
+    const response = {
+      success: true,
+      game: game,
+      message: "Game found.",
+    };
+    res.status(200).send(response);
+  } catch (err) {
+    res.status(500).send({
+      message: err.message || "Some error occurred while retrieving game.",
+    });
+  }
+};
+
+//RETURNS ALL GAMES WHERE THE USER'S PLAYER HAS JOINED/ACCEPTED AN INVITE
 exports.findAllAcceptedPlayerInvites = async (req, res) => {
   console.log("findAllGameInvites called...");
   const userId = await authenticateUserToken(req);
@@ -625,9 +687,12 @@ exports.findAllAcceptedPlayerInvites = async (req, res) => {
 
     const games = await Promise.all(gamesPromises);
 
+    const today = new Date(); // Get the current date
+
     const result = games
       .map((game) => {
-        if (game) {
+        if (game && new Date(game.date) >= today) {
+          // Check if the game date is not before today
           return {
             game: game,
           };

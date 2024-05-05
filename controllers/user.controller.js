@@ -3,6 +3,7 @@ const User = db.users;
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const passwordResetMailer = require("./nodemailer.helper.js");
+const userModel = require("../models/user.model.js");
 
 const authenticateUserToken = async (req) => {
   const jwt = require("jsonwebtoken");
@@ -191,11 +192,19 @@ exports.getCurrentUser = async (req, res) => {
 
   try {
     const user = await User.findByPk(userId);
+    const players = await user.getPlayers();
+    const playerIds = players.map((player) => player.id);
+
+    console.log("Players are ", playerIds);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     } else {
-      return res.json({ success: true, currentRole: user.currentRole });
+      return res.json({
+        success: true,
+        currentRole: user.currentRole,
+        playerIds: playerIds,
+      });
     }
   } catch {
     console.error("Error in switchProfile:", error);
