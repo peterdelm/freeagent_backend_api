@@ -1,6 +1,77 @@
+require("dotenv").config();
 const db = require("../models");
 const Player = db.players;
+const Location = db.locations;
+
 const Op = db.Sequelize.Op;
+
+const createLocation = async (locationString, playerId) => {
+  console.log("Calling createLocation");
+  console.log("with playerId, ", playerId);
+
+  try {
+    const coordinates = await getCoordinates(locationString);
+    console.log("Calling getCoordinates");
+
+    if (coordinates) {
+      console.log("Latitude:", coordinates.latitude);
+      console.log("Longitude:", coordinates.longitude);
+      const newLocation = await createNewLocation(
+        playerId,
+        coordinates,
+        locationString
+      );
+      return newLocation;
+    } else {
+      console.log("Coordinates not found.");
+    }
+  } catch (error) {
+    console.error("Error creating location:", error);
+  }
+};
+
+const getCoordinates = async (locationString) => {
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+        locationString
+      )}&key=AIzaSyDbPFYhBsYTcD_ala9nEOjlM_bkFyALMuI`
+    );
+    const data = await response.json();
+
+    if (data.results && data.results.length > 0) {
+      const { lat, lng } = data.results[0].geometry.location;
+      return { latitude: lat, longitude: lng };
+    }
+  } catch (error) {
+    console.error("Error fetching coordinates:", error);
+    throw new Error("Failed to fetch coordinates.");
+  }
+
+  return null;
+};
+
+const createNewLocation = async (playerId, coordinates, locationString) => {
+  console.log("Calling createNewLocation");
+  console.log("playerId is:", playerId);
+
+  const locationInfo = {
+    playerId: playerId,
+    longitude: coordinates.longitude,
+    latitude: coordinates.latitude,
+    address: locationString,
+  };
+  console.log("locationInfo is", locationInfo);
+
+  try {
+    const newLocation = await Location.create(locationInfo);
+    console.log("Location created:", newLocation);
+
+    return newLocation;
+  } catch (error) {
+    console.error("Error creating location:", error.message);
+  }
+};
 
 // Create and Save a new Player
 exports.create = async (req, res) => {
@@ -54,6 +125,7 @@ exports.create = async (req, res) => {
     console.log(player);
 
     const newPlayer = await Player.create(player);
+    const newLocation = await createLocation(player.location, newPlayer.id);
 
     // Save player in the database
     const response = {

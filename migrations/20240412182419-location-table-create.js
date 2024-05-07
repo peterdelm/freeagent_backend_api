@@ -24,9 +24,19 @@ module.exports = {
       },
       gameId: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "Games",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      playerId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "Players",
           key: "id",
         },
         onUpdate: "CASCADE",

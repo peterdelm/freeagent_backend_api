@@ -1,8 +1,10 @@
 const db = require("../models");
 const Game = db.games;
 const Player = db.players;
-// const Sequelize = require("sequelize");
+const Location = db.locations;
+const sequelize = db.sequelize;
 const { Op } = require("sequelize");
+
 // let criteria = {
 //   range: range,
 //   gender: gender,
@@ -10,24 +12,6 @@ const { Op } = require("sequelize");
 //   calibre: calibre,
 //   sport: sport,
 // };
-
-// // Assuming Player and Game are your Sequelize models
-// const playersWithinRange = await Player.findAll({
-//   where: {
-//     latitude: {
-//       [Op.between]: [
-//         gameLatitude - maxTravelRange,
-//         gameLatitude + maxTravelRange,
-//       ],
-//     },
-//     longitude: {
-//       [Op.between]: [
-//         gameLongitude - maxTravelRange,
-//         gameLongitude + maxTravelRange,
-//       ],
-//     },
-//   },
-// });
 
 const rangeFilter = () => {};
 
@@ -40,6 +24,43 @@ const playerFindingLogic = async (task) => {
     const game = await Game.findByPk(task.gameId);
     const gameLocation = await game.getLocation();
     console.log("gameLocation is: ", gameLocation);
+
+    const playerQueryArgs = {
+      where: {
+        isActive: true,
+        sport: game.sport,
+      },
+      include: [
+        {
+          model: Location,
+          as: "Location",
+          required: true,
+          where: {
+            playerId: { [Op.ne]: null },
+            latitude: {
+              [Op.between]: [
+                sequelize.literal(
+                  `"latitude" - (SELECT "travelRange" FROM "Players" WHERE "Players"."id" = "Location"."playerId")`
+                ),
+                sequelize.literal(
+                  `"latitude" + (SELECT "travelRange" FROM "Players" WHERE "Players"."id" = "Location"."playerId")`
+                ),
+              ],
+            },
+            longitude: {
+              [Op.between]: [
+                sequelize.literal(
+                  `"longitude" - (SELECT "travelRange" FROM "Players" WHERE "Players"."id" = "Location"."playerId")`
+                ),
+                sequelize.literal(
+                  `"longitude" + (SELECT "travelRange" FROM "Players" WHERE "Players"."id" = "Location"."playerId")`
+                ),
+              ],
+            },
+          },
+        },
+      ],
+    };
 
     //Criteria:
     //1. Gender == Gender
@@ -67,12 +88,9 @@ const playerFindingLogic = async (task) => {
         "Calibre: " + game.calibre
       );
 
-      playerOptions = await Player.findAll({
-        where: {
-          isActive: true,
-          sport: game.sport,
-        },
-      });
+      const playersWithinRange = await Player.findAll(playerQueryArgs);
+
+      playerOptions = playersWithinRange;
 
       if (playerOptions.length === 0) {
         console.log("No players found for current criteria");
@@ -88,9 +106,9 @@ const playerFindingLogic = async (task) => {
       console.log("Testing Case 2");
 
       playerOptions = await Player.findAll({
+        ...playerQueryArgs,
         where: {
-          isActive: true,
-          sport: game.sport,
+          ...playerQueryArgs.where,
           calibre: game.calibre,
         },
       });
@@ -192,6 +210,7 @@ const playerFindingLogic = async (task) => {
       console.log("No Player Found for Current Criteria");
     }
 
+    playerOptions;
     return playerOptions;
   } catch (error) {
     console.error("Error occurred while finding players:", error);

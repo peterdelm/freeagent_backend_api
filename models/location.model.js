@@ -2,10 +2,10 @@
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Location extends Model {
-    static associate = (models) => {
+    static associate(models) {
       Location.belongsTo(models.Game, { foreignKey: "gameId" });
       Location.belongsTo(models.Player, { foreignKey: "playerId" });
-    };
+    }
   }
   Location.init(
     {
@@ -46,8 +46,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Location",
-      timestamps: true, // Automatically adds createdAt and updatedAt columns
-      updatedAt: "updatedAt", // Customize the name of the updatedAt column if needed
+      timestamps: true,
+      updatedAt: "updatedAt",
     }
   );
   return Location;

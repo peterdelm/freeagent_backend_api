@@ -12,13 +12,14 @@ module.exports = (sequelize, DataTypes) => {
       Player.belongsTo(models.User, {
         foreignKey: "userId",
         as: "user",
-        allowNull: false,
+        allowNull: true,
         onDelete: "CASCADE",
       });
 
       Player.hasOne(models.Location, {
-        foreignKey: "gameId",
-        as: "Locations",
+        foreignKey: "playerId",
+        as: "location",
+        allowNull: true,
         onDelete: "CASCADE",
       });
     }

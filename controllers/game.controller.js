@@ -13,6 +13,7 @@ const helpers = require("./calculateDistance");
 
 const createLocation = async (locationString, gameId) => {
   console.log("Calling createLocation");
+  console.log("with gameId, ", gameId);
 
   try {
     const coordinates = await getCoordinates(locationString);
@@ -469,60 +470,74 @@ exports.findAllGameInvites = async (req, res) => {
   const userId = await authenticateUserToken(req);
   if (!userId) {
     console.log("ERROR");
-  } else {
+    return res.status(401).send({ success: false, message: "Unauthorized" });
+  }
+
+  try {
     const user = await User.findByPk(userId);
     const players = await user.getPlayers();
 
     const invitesPromises = players.map((player) => player.getInvites());
     const invitesArrays = await Promise.all(invitesPromises);
-
     const invites = [].concat(...invitesArrays);
 
-    // Fetch all the games associated with the invites
     const gamesPromises = invites.map(async (invite) => {
-      const game = await invite.getGame(); // Fetch the game
+      const game = await invite.getGame();
       if (game && !game.matchedPlayerId) {
-        console.log(game.matchedPlayerId);
         return game;
       }
     });
+    const gamesResults = await Promise.allSettled(gamesPromises);
+    const games = gamesResults
+      .filter((result) => result.status === "fulfilled")
+      .map((result) => result.value);
 
-    const games = await Promise.all(gamesPromises);
-
-    const locationsPromises = games
-      .filter((game) => !!game) // Filter out undefined games
-      .map(async (game) => {
-        const location = await game.getLocation(); // Fetch the location
+    const locationsPromises = games.map(async (game) => {
+      try {
+        const location = await game.getLocation();
         return location;
-      });
+      } catch (error) {
+        console.error("Error fetching location:", error);
+        return null;
+      }
+    });
+    const locationsResults = await Promise.allSettled(locationsPromises);
+    const locations = locationsResults
+      .filter((result) => result.status === "fulfilled")
+      .map((result) => result.value);
 
-    const locations = await Promise.all(locationsPromises);
-
+    const uniqueGames = new Set(); // Set to store unique game IDs
     const result = games
-      .filter((game) => !!game) // Filter out undefined games
-      .map((game, index) => ({
-        game: {
-          id: game.id,
-          date: game.date,
-          time: game.time,
-          sport: game.sport,
-          location: game.location,
-          matchedPlayerId: game.matchedPlayerId,
-          position: game.position,
-          calibre: game.calibre,
-          gender: game.gender,
-          gameType: game.gameType,
-          gameLength: game.gameLength,
-          geocoordinates: locations[index] || "", // Use the corresponding location
-        },
-      }));
+      .filter((game) => !!game)
+      .reduce((acc, game, index) => {
+        if (!uniqueGames.has(game.id)) {
+          uniqueGames.add(game.id);
+          acc.push({
+            game: {
+              id: game.id,
+              date: game.date,
+              time: game.time,
+              sport: game.sport,
+              location: game.location,
+              matchedPlayerId: game.matchedPlayerId,
+              position: game.position,
+              calibre: game.calibre,
+              gender: game.gender,
+              gameType: game.gameType,
+              gameLength: game.gameLength,
+              geocoordinates: locations[index] || null,
+            },
+          });
+        }
+        return acc;
+      }, []);
 
-    const response = {
-      success: true,
-      availableGames: result,
-    };
+    console.log("Results are :", result);
 
-    res.status(200).send(response);
+    res.status(200).send({ success: true, availableGames: result });
+  } catch (error) {
+    console.error("Error fetching game invites:", error);
+    res.status(500).send({ success: false, message: "Internal Server Error" });
   }
 };
 
