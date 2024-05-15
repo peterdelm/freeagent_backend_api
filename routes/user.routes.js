@@ -10,6 +10,6 @@ module.exports = (app) => {
   router.get("/", users.getCurrentUser);
   router.post("/reset", users.resetPassword);
   router.put("/reset", users.setNewPassword);
-
+  router.put("/:userId/togglePlayerStatus", users.togglePlayerStatus);
   app.use("/api/users", router);
 };

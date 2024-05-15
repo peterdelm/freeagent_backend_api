@@ -1,5 +1,7 @@
 const db = require("../models");
 const User = db.users;
+const Player = db.players;
+
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const passwordResetMailer = require("./nodemailer.helper.js");
@@ -201,8 +203,10 @@ exports.getCurrentUser = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     } else {
       return res.json({
+        id: user.id,
         success: true,
         currentRole: user.currentRole,
+        isActive: user.isActive,
         playerIds: playerIds,
       });
     }
@@ -291,5 +295,48 @@ exports.setNewPassword = async (req, res) => {
     });
   } catch {
     console.error("Error in resetPassword:", error);
+  }
+};
+
+exports.togglePlayerStatus = async (req, res) => {
+  const userId = await authenticateUserToken(req);
+  console.log("togglePlayerStatus called");
+
+  // Find the user
+  const user = await User.findByPk(userId, {
+    include: [{ model: Player, as: "Players" }],
+  });
+
+  const prevProfile = user.isActive;
+  try {
+    if (prevProfile === true || prevProfile === false) {
+      console.log("A togglePlayerStatus request has been received");
+      console.log("prevProfile is ", prevProfile);
+
+      const newProfile = prevProfile === true ? false : true;
+      await User.update({ isActive: newProfile }, { where: { id: userId } });
+
+      const playerProfiles = await user.getPlayers();
+      console.log(playerProfiles);
+
+      // Update all associated players' isActive to true
+      await Promise.all(
+        playerProfiles.map(async (player) => {
+          await player.update({ isActive: newProfile });
+        })
+      );
+      console.log(playerProfiles);
+
+      return res.json({ success: true, newProfile });
+    } else {
+      console.log("ERROR: toggleProfile request not sent");
+      console.log(prevProfile);
+
+      // Return the current profile to maintain the state
+      return res.json({ success: false, currentProfile: prevProfile });
+    }
+  } catch (error) {
+    console.error("Error in switchProfile:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
