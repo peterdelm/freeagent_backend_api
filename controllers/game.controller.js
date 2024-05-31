@@ -79,34 +79,6 @@ const createNewLocation = async (gameId, coordinates, locationString) => {
   }
 };
 
-authenticateUserToken = async (req) => {
-  const jwt = require("jsonwebtoken");
-  const secretKey = process.env.SECRET;
-  //FIND THE ID of the User
-  try {
-    // Ensure that the authorization header exists
-    if (!req.headers.authorization) {
-      console.log("Authorization header is missing");
-      return null;
-    }
-
-    // Extract the token from the authorization header
-    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-
-    // Decode and verify the JWT
-    const decoded = await jwt.verify(jwtFromHeader, secretKey);
-
-    // Extract the user ID from the decoded JWT payload
-    const userId = decoded.userID;
-    console.log("User ID is " + userId);
-
-    return userId;
-  } catch (err) {
-    console.error("JWT verification failed:", err.message);
-    return null;
-  }
-};
-
 // Create and Save a new Game
 exports.create = async (req, res) => {
   try {
@@ -314,7 +286,6 @@ exports.findAllActive = async (req, res) => {
       } else {
         message = "Active games found.";
       }
-      console.log("Active games are " + activeGames);
 
       const result = activeGames
         .map((game) => {
@@ -362,7 +333,6 @@ exports.findAllPending = async (req, res) => {
       } else {
         message = "Active games found.";
       }
-      console.log("Active games are " + activeGames);
 
       const response = {
         success: true,
@@ -384,14 +354,6 @@ exports.findAllPending = async (req, res) => {
 // Find a single Game with an id
 exports.findOne = async (req, res) => {
   const gameId = req.params.id;
-  const jwt = require("jsonwebtoken");
-  const secretKey = process.env.SECRET;
-
-  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-
-  // Decode and verify the JWT
-  const decoded = jwt.verify(jwtFromHeader, secretKey);
-  const userId = decoded.userID;
 
   try {
     const game = await Game.findByPk(gameId);
@@ -467,7 +429,7 @@ exports.delete = (req, res) => {
 
 exports.findAllGameInvites = async (req, res) => {
   console.log("findAllGameInvites called...");
-  const userId = await authenticateUserToken(req);
+  const userId = req.user.userID;
   if (!userId) {
     console.log("ERROR");
     return res.status(401).send({ success: false, message: "Unauthorized" });
@@ -532,8 +494,6 @@ exports.findAllGameInvites = async (req, res) => {
         return acc;
       }, []);
 
-    console.log("Results are :", result);
-
     res.status(200).send({ success: true, availableGames: result });
   } catch (error) {
     console.error("Error fetching game invites:", error);
@@ -592,7 +552,6 @@ exports.joinGame = async (req, res) => {
         `Attaching Player with ID ${player.id} to Game with ID ${gameId}`
       );
       console.log(`Marking Invite with ID ${invite.id} as 'true'`);
-      console.log(result);
     }
 
     // For now, just send a success response with the game object
@@ -678,7 +637,7 @@ exports.quitGame = async (req, res) => {
 //RETURNS ALL GAMES WHERE THE USER'S PLAYER HAS JOINED/ACCEPTED AN INVITE
 exports.findAllAcceptedPlayerInvites = async (req, res) => {
   console.log("findAllGameInvites called...");
-  const userId = await authenticateUserToken(req);
+  const userId = req.user.userID;
   if (!userId) {
     console.log("ERROR");
   } else {

@@ -1,55 +1,84 @@
 const db = require("../models");
 const User = db.users;
 const Player = db.players;
+const crypto = require("crypto");
+const dbConfig = require("../config/db.config.js");
 
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const passwordResetMailer = require("./nodemailer.helper.js");
 const userModel = require("../models/user.model.js");
 
-const authenticateUserToken = async (req) => {
-  const jwt = require("jsonwebtoken");
-  const secretKey = process.env.SECRET;
-  //FIND THE ID of the User
-  try {
-    // Ensure that the authorization header exists
-    if (!req.headers.authorization) {
-      console.log("Authorization header is missing");
-      return null;
-    }
-
-    // Extract the token from the authorization header
-    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-
-    // Decode and verify the JWT
-    const decoded = await jwt.verify(jwtFromHeader, secretKey);
-
-    // Extract the user ID from the decoded JWT payload
-    const userId = decoded.userID;
-    console.log("User ID is " + userId);
-
-    return userId;
-  } catch (err) {
-    console.error("JWT verification failed:", err.message);
-    return null;
-  }
-};
 //generate a secure JWT (JSON Web Token)
-const generateToken = async (userId) => {
-  try {
-    const secretKey = process.env.SECRET;
-    console.log("generateToken called");
-    console.log(userId);
-    const payload = {
-      userID: userId,
-    };
+const generateTokens = async (userId) => {
+  console.log("generateTokens called for User with ID: ", userId);
 
-    const token = await jwt.sign(payload, secretKey, { expiresIn: "24h" });
-    console.log(token);
-    return token;
+  try {
+    const secretKey = dbConfig.SECRET_KEY;
+    const refreshSecretKey = dbConfig.REFRESH_SECRET;
+
+    // Access token expires in 1 hour
+    const accessToken = jwt.sign({ userID: userId }, secretKey, {
+      expiresIn: "1h",
+    });
+
+    // Refresh token expires in 7 days
+    const refreshToken = jwt.sign({ userID: userId }, refreshSecretKey, {
+      expiresIn: "7d",
+    });
+
+    await User.update(
+      { refreshToken: refreshToken },
+      { where: { id: userId } }
+    );
+
+    console.log("Freshly generated refreshToken is :", refreshToken);
+    return { accessToken, refreshToken };
   } catch (error) {
     console.log("There was an error while generating the token");
   }
+};
+
+exports.refreshToken = (req, res) => {
+  console.log("Refreshing AuthToken in refreshToken...");
+  const secretKey = process.env.SECRET_KEY;
+  const refreshSecretKey = dbConfig.REFRESH_SECRET;
+
+  // Extract the token from the authorization header
+  const jwtFromHeader =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
+
+  // console.log("jwtFromHeader in function refreshToken is: ", jwtFromHeader);
+  if (!jwtFromHeader) {
+    console.log(
+      "Authorization header is missing or malformed in function refreshToken"
+    );
+    return res.status(401).send("Authorization header is missing or malformed");
+  }
+
+  jwt.verify(jwtFromHeader, refreshSecretKey, (err, decoded) => {
+    if (err) {
+      console.log("refreshSecretKey key is", refreshSecretKey);
+      console.log("Invalid or expired refresh token in function refreshToken");
+      return res.status(403).send("Invalid or expired refresh token");
+    }
+
+    // Generate a new token
+    console.log(
+      "RefreshToken passed verification. Generating new Access Token..."
+    );
+
+    const newToken = jwt.sign({ userID: decoded.userID }, secretKey, {
+      expiresIn: "1m",
+    });
+    console.log("New Access Token being sent as : ", newToken);
+
+    // Respond with the new token
+    res.json({
+      token: newToken,
+      user: { userId: decoded.userID, currentRole: decoded.currentRole },
+    });
+  });
 };
 
 // Retrieve all Users from the database.
@@ -80,9 +109,7 @@ exports.login = async (req, res) => {
       console.log("Not found!");
     } else {
       if (req.body.password === user.password) {
-        console.log(user.email); // 'My Title'
-
-        const token = await generateToken(user.id);
+        const token = await generateTokens(user.id);
 
         const userData = { userId: user.id, currentRole: user.currentRole };
 
@@ -92,7 +119,6 @@ exports.login = async (req, res) => {
           token: token,
         });
       } else {
-        console.log(user.email); // 'My Title'
         res.status(401).send({
           error: "Incorrect username/password",
         });
@@ -190,14 +216,12 @@ exports.create = async (req, res) => {
 
 exports.getCurrentUser = async (req, res) => {
   console.log("getCurrentUser has been called");
-  const userId = await authenticateUserToken(req);
+  const userId = req.user.userID;
 
   try {
     const user = await User.findByPk(userId);
     const players = await user.getPlayers();
     const playerIds = players.map((player) => player.id);
-
-    console.log("Players are ", playerIds);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -210,8 +234,8 @@ exports.getCurrentUser = async (req, res) => {
         playerIds: playerIds,
       });
     }
-  } catch {
-    console.error("Error in switchProfile:", error);
+  } catch (error) {
+    console.error("Error in getCurrentUser:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -241,8 +265,8 @@ exports.switchProfile = async (req, res) => {
       // Return the current profile to maintain the state
       return res.json({ success: false, currentProfile: prevProfile });
     }
-  } catch {
-    console.error("Error in switchProfile:", error);
+  } catch (error) {
+    console.error("Error in switchProfile: ", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -325,7 +349,6 @@ exports.togglePlayerStatus = async (req, res) => {
           await player.update({ isActive: newProfile });
         })
       );
-      console.log(playerProfiles);
 
       return res.json({ success: true, newProfile });
     } else {

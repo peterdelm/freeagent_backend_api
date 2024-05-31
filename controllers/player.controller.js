@@ -328,7 +328,6 @@ exports.findAllUserPlayers = async (req, res) => {
     } else {
       message = "Players found.";
     }
-    console.log("Active players are " + players);
 
     const response = {
       success: true,
