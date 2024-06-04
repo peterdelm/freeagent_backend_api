@@ -1,9 +1,9 @@
 const db = require("../models");
 const Task = db.tasks;
 const Game = db.games;
-const Player = db.players;
 const Invite = db.invites;
 
+const { sendPushNotification } = require("../services/firebaseService.js");
 const { playerFindingLogic } = require("./playerFindingLogic"); // Import the worker module
 
 async function processTask(task) {
@@ -15,6 +15,8 @@ async function processTask(task) {
 
     const playerOptions = await playerFindingLogic(task, game);
 
+    let userPushTokens = [];
+
     for (const player of playerOptions) {
       inviteParams = {
         playerId: player.id,
@@ -22,10 +24,18 @@ async function processTask(task) {
       };
 
       const invite = await Invite.create(inviteParams);
+      const user = await player.getUser();
       console.log("Player ID: " + player.id);
       console.log("Invite ID: " + invite.id);
+      console.log("User pushToken is: " + user.pushToken);
+      // Collect the push tokens
+      if (user.pushToken) {
+        userPushTokens.push(user.pushToken);
+      }
     }
     //Send the request to the suitable players
+    const response = sendPushNotification(userPushTokens);
+    console.log("Expo Firebase response is", response);
     //Await the response...
     //Upon response, kill the pending game
     //Notify the manager

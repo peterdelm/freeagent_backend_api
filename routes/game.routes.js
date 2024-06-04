@@ -5,7 +5,6 @@ module.exports = (app) => {
   const authenticateUserToken = require("../middleware/auth");
   //public
   // Create a new Game
-  router.post("/", games.create);
 
   // Retrieve all Games
   router.get("/", games.findAll);
@@ -17,6 +16,7 @@ module.exports = (app) => {
 
   //protected routes
   router.use(authenticateUserToken);
+  router.post("/", games.create);
   router.get("/:id", games.findOne);
   router.get("/invites", games.findAllGameInvites);
   router.get("/acceptedplayerinvites", games.findAllAcceptedPlayerInvites);

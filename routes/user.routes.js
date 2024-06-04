@@ -12,6 +12,7 @@ module.exports = (app) => {
   router.put("/reset", users.setNewPassword);
   router.put("/:userId/togglePlayerStatus", users.togglePlayerStatus);
   router.post("/refreshToken", users.refreshToken);
+  router.post("/pushToken", users.updatePushToken);
 
   // Protected routes
   router.use(authenticateUserToken);

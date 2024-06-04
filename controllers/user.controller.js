@@ -69,9 +69,8 @@ exports.refreshToken = (req, res) => {
     );
 
     const newToken = jwt.sign({ userID: decoded.userID }, secretKey, {
-      expiresIn: "1m",
+      expiresIn: "24h",
     });
-    console.log("New Access Token being sent as : ", newToken);
 
     // Respond with the new token
     res.json({
@@ -360,6 +359,21 @@ exports.togglePlayerStatus = async (req, res) => {
     }
   } catch (error) {
     console.error("Error in switchProfile:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+exports.updatePushToken = async (req, res) => {
+  console.log("updatePushToken called");
+
+  const { userId, expoPushToken } = req.body;
+  console.log("expoPushToken is", expoPushToken);
+
+  try {
+    await User.update({ pushToken: expoPushToken }, { where: { id: userId } });
+    return res.json({ success: true, message: "updatePushToken called" });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };

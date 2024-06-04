@@ -92,29 +92,12 @@ exports.create = async (req, res) => {
       });
       return;
     }
-    console.log(req.headers);
-
-    const jwt = require("jsonwebtoken");
-    const secretKey = process.env.SECRET;
     //FIND THE ID of the User
     console.log("Auth token is " + req.headers.authorization);
-    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+    const userId = req.user.userID;
+    console.log("userId in game.create is", userId);
 
     // Decode and verify the JWT
-    const userId = await jwt.verify(
-      jwtFromHeader,
-      secretKey,
-      (err, decoded) => {
-        if (err) {
-          console.log("JWT verification failed");
-        } else {
-          const userId = decoded.userID;
-          console.log("User ID is " + userId);
-
-          return userId;
-        }
-      }
-    );
 
     ////////////PLACE GEOCODING CALL BELOW////////////////////
 

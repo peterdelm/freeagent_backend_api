@@ -24,6 +24,10 @@ const authenticateUserToken = (req, res, next) => {
       "Access Token Authenticated Successfully. User logged in as: ",
       req.user.userID
     );
+    console.log(
+      "Access Token Authenticated Successfully. User logged in as: ",
+      token
+    );
 
     next();
   });
