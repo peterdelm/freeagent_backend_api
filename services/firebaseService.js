@@ -1,5 +1,5 @@
 const { Expo } = require("expo-server-sdk");
-const sendPushNotification = async (userPushTokens, title, body, data) => {
+const sendPushNotification = async ({ userPushTokens, title, body, data }) => {
   let expo = new Expo({
     // accessToken: process.env.EXPO_ACCESS_TOKEN,
     useFcmV1: true, // this can be set to true in order to use the FCM v1 API
@@ -16,12 +16,17 @@ const sendPushNotification = async (userPushTokens, title, body, data) => {
       continue;
     }
 
+    const { gameId } = data;
+
+    console.log("gameId is", gameId);
+    console.log("data is", data);
+
     messages.push({
       to: pushToken,
       sound: "default",
       title: "Free Agent",
       body: "A Game Needs You!",
-      data: { withSome: "data" },
+      data: { data, url: `free_agent://` },
     });
   }
 
@@ -39,7 +44,7 @@ const sendPushNotification = async (userPushTokens, title, body, data) => {
     for (let chunk of chunks) {
       try {
         let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
-        console.log(ticketChunk);
+        console.log("ticketChunk is", ticketChunk);
         tickets.push(...ticketChunk);
         // NOTE: If a ticket contains an error code in ticket.details.error, you
         // must handle it appropriately. The error codes are listed in the Expo

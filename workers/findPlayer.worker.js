@@ -33,8 +33,13 @@ async function processTask(task) {
         userPushTokens.push(user.pushToken);
       }
     }
+
+    const data = { gameId: game.id };
     //Send the request to the suitable players
-    const response = sendPushNotification(userPushTokens);
+    const response = sendPushNotification({
+      userPushTokens: userPushTokens,
+      data: data,
+    });
     console.log("Expo Firebase response is", response);
     //Await the response...
     //Upon response, kill the pending game
