@@ -1,13 +1,11 @@
 const db = require("../models");
 const User = db.users;
 const Player = db.players;
-const crypto = require("crypto");
 const dbConfig = require("../config/db.config.js");
 
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const passwordResetMailer = require("./nodemailer.helper.js");
-const userModel = require("../models/user.model.js");
 
 //generate a secure JWT (JSON Web Token)
 const generateTokens = async (userId) => {
@@ -225,6 +223,7 @@ exports.getCurrentUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     } else {
+      console.log("User found with id: user.id");
       return res.json({
         id: user.id,
         success: true,

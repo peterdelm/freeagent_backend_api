@@ -16,11 +16,11 @@ module.exports = (app) => {
 
   //protected routes
   router.use(authenticateUserToken);
-  router.post("/", games.create);
-  router.get("/:id", games.findOne);
   router.get("/invites", games.findAllGameInvites);
   router.get("/acceptedplayerinvites", games.findAllAcceptedPlayerInvites);
   router.get("/active", games.findAllActive);
+  router.post("/", games.create);
+  router.get("/:id", games.findOne);
 
   app.use("/api/games", router);
 };
