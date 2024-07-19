@@ -8,8 +8,8 @@ require("dotenv").config();
 const passwordResetMailer = require("./nodemailer.helper.js");
 
 //generate a secure JWT (JSON Web Token)
-const generateTokens = async (userId) => {
-  console.log("generateTokens called for User with ID: ", userId);
+const generateToken = async (userId) => {
+  console.log("generateToken called for User with ID: ", userId);
 
   try {
     const secretKey = dbConfig.SECRET_KEY;
@@ -106,7 +106,7 @@ exports.login = async (req, res) => {
       console.log("Not found!");
     } else {
       if (req.body.password === user.password) {
-        const token = await generateTokens(user.id);
+        const token = await generateToken(user.id);
 
         const userData = { userId: user.id, currentRole: user.currentRole };
 
