@@ -100,15 +100,19 @@ exports.login = async (req, res) => {
     });
 
     if (user === null) {
+      console.log("User is null");
       res.status(401).send({
         error: "User not found",
       });
       console.log("Not found!");
     } else {
       if (req.body.password === user.password) {
+        console.log("Correct Credentials received in exports.login");
         const token = await generateToken(user.id);
+        console.log("Correct token generated received in exports.login");
 
         const userData = { userId: user.id, currentRole: user.currentRole };
+        console.log("userData in exports.login");
 
         res.status(200).send({
           user: userData,
