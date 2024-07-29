@@ -221,12 +221,9 @@ exports.getCurrentUser = async (req, res) => {
 
   try {
     const user = await User.findByPk(userId);
-    const players = await user.getPlayers();
-    const playerIds = players.map((player) => player.id);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    } else {
+    if (user) {
+      const players = await user.getPlayers();
+      const playerIds = players.map((player) => player.id);
       console.log("User found with id: user.id");
       return res.json({
         id: user.id,
@@ -235,6 +232,9 @@ exports.getCurrentUser = async (req, res) => {
         isActive: user.isActive,
         playerIds: playerIds,
       });
+    }
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
   } catch (error) {
     console.error("Error in getCurrentUser:", error);
