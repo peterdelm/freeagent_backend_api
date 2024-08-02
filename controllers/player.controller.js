@@ -86,29 +86,14 @@ exports.create = async (req, res) => {
       });
       return;
     }
-
-    const jwt = require("jsonwebtoken");
-    const secretKey = process.env.SECRET;
     //FIND THE ID of the User
     console.log("Auth token is " + req.headers.authorization);
-    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-    console.log("jwtFromHeader is " + jwtFromHeader);
 
     // Decode and verify the JWT
-    const userId = await jwt.verify(
-      jwtFromHeader,
-      secretKey,
-      (err, decoded) => {
-        if (err) {
-          console.log("JWT verification failed");
-        } else {
-          const userId = decoded.userID;
-          console.log("User ID is " + userId);
+    // const userId = req.body.userId;
+    const userId = req.user.userID;
 
-          return userId;
-        }
-      }
-    );
+    console.log("userId is", userId);
 
     // Create a player
     const player = {
@@ -131,10 +116,11 @@ exports.create = async (req, res) => {
     const response = {
       success: true, // Set the success property to true
       player: newPlayer,
+      location: newLocation,
       message: "Player Added",
     };
     res.status(200).send(response);
-    console.log("Game Added");
+    console.log("Player Added");
   } catch (err) {
     console.log("Problem with request");
     console.log("err.name", err.name);

@@ -95,6 +95,8 @@ exports.findAll = (req, res) => {
 exports.login = async (req, res) => {
   try {
     // Find the user by email
+    console.log("User.login request received");
+
     const user = await User.findOne({
       where: { email: req.body.emailAddress },
     });

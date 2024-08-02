@@ -4,9 +4,6 @@ module.exports = (app) => {
   var router = require("express").Router();
   const authenticateUserToken = require("../middleware/auth");
   //public
-  // Create a new Game
-
-  // Retrieve all Games
   router.get("/", games.findAll);
   router.get("/pending", games.findAllPending);
   router.put("/joinGame", games.joinGame);
