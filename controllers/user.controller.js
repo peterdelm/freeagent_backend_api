@@ -202,7 +202,7 @@ exports.create = async (req, res) => {
         console.log("User with email " + user.email + " already exists.");
         res.status(409).send({
           success: false,
-          message: "A user with that email already exists.",
+          message: "It looks like this email address is already registered.",
         });
       }
     } else {
