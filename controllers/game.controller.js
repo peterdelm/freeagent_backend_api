@@ -245,17 +245,8 @@ exports.findAll = (req, res) => {
 exports.findAllActive = async (req, res) => {
   console.log("FindAll Active Games Request Received");
 
-  const jwt = require("jsonwebtoken");
-  const secretKey = process.env.SECRET;
-
   try {
-    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-
-    // Decode and verify the JWT
-    const decoded = jwt.verify(jwtFromHeader, secretKey);
-    const userId = decoded.userID;
-
-    console.log("JWT verification succeeded. User ID is " + userId);
+    const userId = req.user.userID;
 
     //FIND ACTIVE GAMES BELONGING TO THE USER
     try {
