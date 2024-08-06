@@ -226,7 +226,6 @@ exports.getCurrentUser = async (req, res) => {
     if (user) {
       const players = await user.getPlayers();
       const playerIds = players.map((player) => player.id);
-      console.log("User found with id: user.id");
       return res.json({
         id: user.id,
         success: true,

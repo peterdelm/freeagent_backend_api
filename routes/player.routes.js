@@ -12,8 +12,8 @@ module.exports = (app) => {
 
   //protected routes
   router.use(authenticateUserToken);
-  router.get("/:id", players.findOne);
   router.get("/playerRoster", players.findAllUserPlayers);
+  router.get("/:id", players.findOne);
   router.post("/", players.create);
 
   app.use("/api/players", router);

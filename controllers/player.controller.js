@@ -292,13 +292,9 @@ exports.findAllUserPlayers = async (req, res) => {
   console.log("FindAll User Players Request Received");
 
   try {
-    const jwt = require("jsonwebtoken");
-    const secretKey = process.env.SECRET;
-    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-
     // Decode and verify the JWT
-    const decoded = jwt.verify(jwtFromHeader, secretKey);
-    const userId = decoded.userID;
+
+    const userId = req.user.userID;
 
     console.log("JWT verification succeeded. User ID is " + userId);
 
