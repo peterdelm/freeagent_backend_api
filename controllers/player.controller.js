@@ -155,7 +155,7 @@ exports.findOne = (req, res) => {
 
   Player.findByPk(id)
     .then((data) => {
-      res.send(data);
+      res.status(200).send(data);
     })
     .catch((err) => {
       res.status(500).send({
@@ -166,10 +166,11 @@ exports.findOne = (req, res) => {
 
 // Update a player by the id in the request
 exports.update = async (req, res) => {
-  console.log("Player.updaste request received");
+  console.log("Player.update request received");
   try {
+    console.log(req.body);
     const playerId = req.params.id;
-
+    console.log("BoDy is ", req.body);
     //if the value of calibre, location, position, gender is blank, use the original value
     const { calibre, location, travelRange, gender, bio, position } = req.body;
 
