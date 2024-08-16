@@ -328,7 +328,7 @@ exports.findAllPending = async (req, res) => {
 // Find a single Game with an id
 exports.findOne = async (req, res) => {
   const gameId = req.params.id;
-
+  console.log("Game.findOne called with id", gameId);
   try {
     const game = await Game.findByPk(gameId);
     if (!game) {

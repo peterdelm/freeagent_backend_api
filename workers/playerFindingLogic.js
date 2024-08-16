@@ -13,19 +13,57 @@ const { Op } = require("sequelize");
 //   sport: sport,
 // };
 
-const rangeFilter = () => {};
-
 //Returns an array of players which fit the criteria
 const playerFindingLogic = async (task) => {
   try {
     //Assemble a list of suitable players
-    console.log("Processing Task with ID " + task.id);
+    console.log("Player Finding logic has been called");
     //Get the game associated with the task
     const game = await Game.findByPk(task.gameId);
     const gameLocation = await game.getLocation();
-    console.log("gameLocation is: ", gameLocation);
 
-    const playerQueryArgs = {
+    const haversineDistance = (lat1, lon1, lat2, lon2) => {
+      const toRad = (value) => (value * Math.PI) / 180;
+
+      const R = 6371; // Radius of the Earth in kilometers
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) *
+          Math.cos(toRad(lat2)) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c; // Distance in kilometers
+    };
+
+    const rangeFilter = (players) => {
+      let playerList = [];
+
+      players.forEach((player) => {
+        const playerLocation = player.Location;
+        const distance = haversineDistance(
+          gameLocation.latitude,
+          gameLocation.longitude,
+          playerLocation.latitude,
+          playerLocation.longitude
+        );
+
+        console.log(
+          `Player ${player.id} is ${distance.toFixed(2)} km away from the game.`
+        );
+        if (distance.toFixed(2) <= player.travelRange) {
+          playerList.push(player);
+        }
+      });
+      return playerList;
+    };
+
+    const players = await Player.findAll({
       where: {
         isActive: true,
         sport: game.sport,
@@ -35,32 +73,9 @@ const playerFindingLogic = async (task) => {
           model: Location,
           as: "Location",
           required: true,
-          where: {
-            playerId: { [Op.ne]: null },
-            latitude: {
-              [Op.between]: [
-                sequelize.literal(
-                  `"latitude" - (SELECT "travelRange" FROM "Players" WHERE "Players"."id" = "Location"."playerId")`
-                ),
-                sequelize.literal(
-                  `"latitude" + (SELECT "travelRange" FROM "Players" WHERE "Players"."id" = "Location"."playerId")`
-                ),
-              ],
-            },
-            longitude: {
-              [Op.between]: [
-                sequelize.literal(
-                  `"longitude" - (SELECT "travelRange" FROM "Players" WHERE "Players"."id" = "Location"."playerId")`
-                ),
-                sequelize.literal(
-                  `"longitude" + (SELECT "travelRange" FROM "Players" WHERE "Players"."id" = "Location"."playerId")`
-                ),
-              ],
-            },
-          },
         },
       ],
-    };
+    });
 
     //Criteria:
     //1. Gender == Gender
@@ -88,14 +103,17 @@ const playerFindingLogic = async (task) => {
         "Calibre: " + game.calibre
       );
 
-      const playersWithinRange = await Player.findAll(playerQueryArgs);
+      const playersWithinRange = players;
 
-      playerOptions = playersWithinRange;
+      playerOptions = rangeFilter(players);
 
       if (playerOptions.length === 0) {
         console.log("No players found for current criteria");
       } else {
-        console.log("playerOptions are: ", playerOptions);
+        playerOptions.forEach((player) => {
+          console.log("Player address is ", player.location);
+        });
+        console.log("playerOptions are: ", playerOptions.length);
       }
     } else if (
       // Case 2: Gender and position are 'any', calibre is 'specific'
