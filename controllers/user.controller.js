@@ -135,17 +135,26 @@ exports.login = async (req, res) => {
   }
 };
 
-// Find a single Game with an id
+// Find a single User with an id
 exports.findOne = (req, res) => {
+  console.log("User.findOne called. Req is ", req.params);
   const id = req.params.id;
-  update;
-  Game.findByPk(id)
-    .then((data) => {
-      res.send(data);
+  User.findByPk(id)
+    .then((user) => {
+      const response = {
+        success: true,
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        },
+      };
+      console.log("Userdata is:", user.firstName);
+      res.status(200).send(response);
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Game with id=" + id,
+        message: "Error retrieving User with id=" + id + err,
       });
     });
 };

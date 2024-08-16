@@ -16,6 +16,7 @@ module.exports = (app) => {
 
   // Protected routes
   router.use(authenticateUserToken);
+  router.get("/:id", users.findOne);
   router.get("/", users.getCurrentUser);
 
   app.use("/api/users", router);
