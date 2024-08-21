@@ -5,6 +5,7 @@ module.exports = (app) => {
   const authenticateUserToken = require("../middleware/auth");
 
   // Public routes
+  router.get("/verifyToken", users.verifyToken);
   router.post("/id", users.login);
   router.post("/", users.create);
   router.put("/", users.switchProfile);

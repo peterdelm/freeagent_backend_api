@@ -95,6 +95,20 @@ exports.create = async (req, res) => {
 
     console.log("userId is", userId);
 
+    const players = await Player.findAll({
+      where: { userId: userId },
+    });
+
+    const playerSports = players.map((profile) => profile.sport);
+    const uniqueSports = [...new Set(playerSports)];
+    if (uniqueSports.includes(req.body.sport)) {
+      res.status(400).send({
+        messageOp: "Users cannot create duplicate sport profiles",
+      });
+      return;
+    } else {
+      console.log("This player does not have a ", req.body.sport, "profile");
+    }
     // Create a player
     const player = {
       gender: req.body.gender,

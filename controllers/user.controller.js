@@ -67,7 +67,7 @@ exports.refreshToken = (req, res) => {
     );
 
     const newToken = jwt.sign({ userID: decoded.userID }, secretKey, {
-      expiresIn: "24h",
+      expiresIn: "1m",
     });
 
     // Respond with the new token
@@ -92,6 +92,45 @@ exports.findAll = (req, res) => {
     });
 };
 
+exports.verifyToken = async (req, res) => {
+  try {
+    console.log("User.verifyToken request received");
+    const secretKey = process.env.SECRET_KEY;
+
+    // Ensure that the authorization header exists
+    if (!req.headers.authorization) {
+      console.log("Authorization header is missing");
+      return res
+        .status(401)
+        .json({ message: "Authorization header is missing" });
+    }
+
+    const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
+
+    // Decode and verify the JWT
+    const decoded = jwt.verify(jwtFromHeader, secretKey);
+    const userId = decoded.userId; // Adjust based on your JWT payload
+
+    res.status(200).json({
+      user: { id: userId }, // Replace with actual user data if available
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error verifying token:", error);
+
+    // Handle specific JWT errors
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+    if (error.name === "TokenExpiredError") {
+      return res.status(403).json({ message: "Token expired" });
+    }
+
+    // Handle other errors
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
     // Find the user by email
@@ -110,6 +149,7 @@ exports.login = async (req, res) => {
     } else {
       if (req.body.password === user.password) {
         console.log("Correct Credentials received in exports.login");
+        //Generate a Refresh Token and an Access Token
         const token = await generateToken(user.id);
         console.log("Correct token generated received in exports.login");
 
@@ -253,7 +293,7 @@ exports.getCurrentUser = async (req, res) => {
 };
 
 exports.switchProfile = async (req, res) => {
-  const userId = await authenticateUserToken(req);
+  const userId = req.user.userID;
 
   try {
     const user = await User.findByPk(userId);
@@ -316,7 +356,7 @@ exports.resetPassword = async (req, res) => {
 exports.setNewPassword = async (req, res) => {
   try {
     //check if the token is legit
-    const userId = await authenticateUserToken(req);
+    const userId = req.user.userID;
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -335,7 +375,7 @@ exports.setNewPassword = async (req, res) => {
 };
 
 exports.togglePlayerStatus = async (req, res) => {
-  const userId = await authenticateUserToken(req);
+  const userId = req.user.userID;
   console.log("togglePlayerStatus called");
 
   // Find the user
