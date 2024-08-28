@@ -412,7 +412,14 @@ exports.findAllGameInvites = async (req, res) => {
   try {
     const user = await User.findByPk(userId);
     if (user) {
+      let playerLocation;
       const players = await user.getPlayers();
+      if (players.length > 0) {
+        const firstPlayer = players[0];
+        playerLocation = await firstPlayer.getLocation();
+
+        console.log("Location of the first player:", playerLocation);
+      }
 
       const invitesPromises = players.map((player) => player.getInvites());
       const invitesArrays = await Promise.all(invitesPromises);
@@ -479,7 +486,11 @@ exports.findAllGameInvites = async (req, res) => {
           return acc;
         }, []);
       console.log("Returning res.status success");
-      res.status(200).send({ success: true, availableGames: result });
+      res.status(200).send({
+        success: true,
+        availableGames: result,
+        playerLocation: playerLocation || null, // Include the location of the first player
+      });
     }
   } catch (error) {
     console.error("Error fetching game invites:", error);
