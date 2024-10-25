@@ -6,9 +6,7 @@ module.exports = (app) => {
   //public
   router.get("/", games.findAll);
   router.get("/pending", games.findAllPending);
-  router.put("/joinGame", games.joinGame);
   router.put("/quitGame", games.quitGame);
-  router.put("/:id", games.update);
   router.delete("/:id", games.delete);
 
   //protected routes
@@ -18,6 +16,8 @@ module.exports = (app) => {
   router.get("/active", games.findAllActive);
   router.post("/", games.create);
   router.get("/:id", games.findOne);
+  router.put("/:id", games.update);
+  router.put("/joinGame/:id", games.joinGame);
 
   app.use("/api/games", router);
 };

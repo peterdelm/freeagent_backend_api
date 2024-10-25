@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { isValid, parseISO } = require("date-fns");
 const db = require("../models");
 const Game = db.games;
 const Task = db.tasks;
@@ -8,8 +9,6 @@ const Invite = db.invites;
 const Location = db.locations;
 
 const Op = db.Sequelize.Op;
-
-const helpers = require("./calculateDistance");
 
 const createLocation = async (locationString, gameId) => {
   console.log("Calling createLocation");
@@ -352,28 +351,103 @@ exports.findOne = async (req, res) => {
 };
 
 // Update a Game by the id in the request
-exports.update = (req, res) => {
-  const id = req.params.id;
+exports.update = async (req, res) => {
+  console.log("Games.Update request received.");
+  console.log("Req.body is", req.body);
 
-  Game.update(req.body, {
-    where: { id: id },
-  })
-    .then((num) => {
-      if (num == 1) {
-        res.send({
-          message: "Game was updated successfully.",
-        });
+  try {
+    console.log(req.body);
+    const gameId = req.params.id;
+    //if the value of  is blank, use the original value
+    const {
+      location,
+      date,
+      time,
+      calibre,
+      gender,
+      position,
+      gameType,
+      gameLength,
+      additionalInfo,
+    } = req.body;
+
+    const game = await Game.findByPk(gameId);
+    if (!game) {
+      console.log("Game not found with id" + gameId);
+      return res.status(404).json({ error: "Game not found." });
+    }
+    //create an object to hold any changes
+    const updates = {};
+    if (typeof location !== "undefined" && location.trim() !== "") {
+      updates.location = location;
+    }
+    if (date?.dateString?.trim()) {
+      const parsedDate = parseISO(date.dateString);
+
+      if (isValid(parsedDate)) {
+        // Store in ISO format for consistency
+        updates.date = parsedDate.toISOString(); // This ensures the date is in ISO format
+        console.log("Updates.date is", updates.date);
       } else {
-        res.send({
-          message: `Cannot update Game with id=${id}. Maybe Game was not found or req.body is empty!`,
-        });
+        console.error("Invalid date format:", date.dateString);
+        // Optional: provide user feedback here
       }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error updating Game with id=" + id,
+    }
+    if (typeof time !== "undefined" && time.trim() !== "") {
+      updates.time = time;
+    }
+    if (typeof calibre !== "undefined" && calibre.trim() !== "") {
+      updates.calibre = calibre;
+    }
+    if (typeof gender !== "undefined" && gender.trim() !== "") {
+      updates.gender = gender;
+    }
+    if (typeof position !== "undefined" && position.trim() !== "") {
+      updates.position = position;
+    }
+    if (typeof gameType !== "undefined" && gameType.trim() !== "") {
+      updates.gameType = gameType;
+    }
+    if (typeof gameLength !== "undefined" && gameLength.trim() !== "") {
+      updates.gameLength = gameLength;
+    }
+    if (typeof additionalInfo !== "undefined" && additionalInfo.trim() !== "") {
+      updates.additionalInfo = additionalInfo;
+    }
+
+    console.log("Game Updates are", updates);
+    if (Object.keys(updates).length > 0) {
+      Game.update(updates, {
+        where: { id: gameId },
+      })
+        .then((num) => {
+          if (num == 1) {
+            res.send({
+              success: true,
+              message: "Game was updated successfully.",
+            });
+          } else {
+            console.log("Problem with game.update");
+            res.send({
+              message: `Cannot update game with id=${gameId}. Maybe game was not found or req.body is empty!`,
+            });
+          }
+        })
+        .catch((err) => {
+          res.status(500).send({
+            message: "Error updating game with id=" + gameId,
+          });
+        });
+    } else {
+      res.send({
+        success: true,
+        message: "No Changes to Game Were Made",
       });
-    });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
 };
 
 // Delete a Game with the specified id in the request
@@ -501,18 +575,8 @@ exports.findAllGameInvites = async (req, res) => {
 // Find a single Game with an id
 exports.joinGame = async (req, res) => {
   console.log("Join game request received");
-
-  const jwt = require("jsonwebtoken");
-  const secretKey = process.env.SECRET;
-
-  const jwtFromHeader = req.headers.authorization.replace("Bearer ", "");
-
-  // Decode and verify the JWT
-  const decoded = jwt.verify(jwtFromHeader, secretKey);
-  const userId = decoded.userID;
-  console.log("User Id in joinGame request is: ", userId);
-
-  const gameId = req.body.gameId;
+  const gameId = req.params.id;
+  const userId = req.user.userID;
 
   try {
     // Check if gameId is provided
@@ -542,13 +606,20 @@ exports.joinGame = async (req, res) => {
       const result = await Game.update(gameUpdates, {
         where: { id: gameId },
       });
-      const invite = await Invite.update(inviteUpdates, {
-        where: { playerId: player.id, gameId: gameId },
-      });
+      try {
+        const invite = await Invite.update(inviteUpdates, {
+          where: { playerId: player.id, gameId: gameId },
+        });
+        const acceptedInvite = await Invite.findOne({
+          where: { playerId: player.id, gameId: gameId },
+        });
+        console.log(`Marking Invite with ID ${acceptedInvite.id} as 'true'`);
+      } catch {
+        ("Invite for player not found");
+      }
       console.log(
         `Attaching Player with ID ${player.id} to Game with ID ${gameId}`
       );
-      console.log(`Marking Invite with ID ${invite.id} as 'true'`);
     }
 
     // For now, just send a success response with the game object
