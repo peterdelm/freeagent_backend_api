@@ -109,6 +109,10 @@ exports.verifyToken = async (req, res) => {
 
     // Decode and verify the JWT
     const decoded = jwt.verify(jwtFromHeader, secretKey);
+
+    if (!decoded) {
+      console.log("Decoded response is", decoded);
+    }
     const userId = decoded.userId; // Adjust based on your JWT payload
 
     res.status(200).json({

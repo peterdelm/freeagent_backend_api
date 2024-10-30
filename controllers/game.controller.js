@@ -451,28 +451,53 @@ exports.update = async (req, res) => {
 };
 
 // Delete a Game with the specified id in the request
-exports.delete = (req, res) => {
-  const id = req.params.id;
+exports.delete = async (req, res) => {
+  console.log("game.delete request received with ID", req.params.id);
+  const gameId = req.params.id;
 
-  Game.destroy({
-    where: { id: id },
-  })
-    .then((num) => {
-      if (num == 1) {
-        res.send({
-          message: "Game was deleted successfully!",
-        });
-      } else {
-        res.send({
-          message: `Cannot delete Game with id=${id}. Maybe Game was not found!`,
-        });
-      }
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Could not delete Game with id=" + id,
-      });
+  const game = await Game.findOne({ where: { id: gameId } });
+
+  if (!game) {
+    console.log(`Game with ID ${gameId} not found.`);
+    return res.status(400).send({
+      message: "Cannot Delete a Game with a Matched Player",
     });
+  }
+
+  console.log("Game is", game);
+
+  if (game.matchedPlayerId != null) {
+    console.log("Matched player id != null");
+    return res.status(400).send({
+      message: "Cannot Delete a Game with a Matched Player",
+    });
+  }
+
+  // Game.destroy({
+  //   where: { id: gameId },
+  // })
+  //   .then((num) => {
+  //     if (num == 1) {
+  //       res.send({
+  //         message: "Game was deleted successfully!",
+  //       });
+  //     } else {
+  //       res.send({
+  //         message: `Cannot delete Game with id=${gameId}. Maybe Game was not found!`,
+  //       });
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     res.status(500).send({
+  //       message: "Could not delete Game with id=" + gameId,
+  //     });
+  //   });
+  if (game.matchedPlayerId == null) {
+    console.log("Matched player id != null");
+    return res.status(200).send({
+      message: "gameDeleted",
+    });
+  }
 };
 
 exports.findAllGameInvites = async (req, res) => {
@@ -582,6 +607,12 @@ exports.joinGame = async (req, res) => {
     // Check if gameId is provided
     if (!gameId) {
       return res.status(400).send({ message: "Game ID is required." });
+    }
+
+    if (game.userId === userId) {
+      return res
+        .status(400)
+        .send({ errorMessage: "You cannot join your own game" });
     }
     // Check if game with provided gameId exists
     const game = await Game.findByPk(gameId);
