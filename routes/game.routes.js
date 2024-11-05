@@ -6,7 +6,6 @@ module.exports = (app) => {
   //public
   router.get("/", games.findAll);
   router.get("/pending", games.findAllPending);
-  router.put("/quitGame", games.quitGame);
 
   //protected routes
   router.use(authenticateUserToken);
@@ -14,6 +13,7 @@ module.exports = (app) => {
   router.get("/acceptedplayerinvites", games.findAllAcceptedPlayerInvites);
   router.get("/active", games.findAllActive);
   router.post("/", games.create);
+  router.put("/quitGame", games.quitGame);
   router.get("/:id", games.findOne);
   router.put("/:id", games.update);
   router.put("/joinGame/:id", games.joinGame);
