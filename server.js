@@ -62,6 +62,7 @@ require("./routes/game.routes")(app);
 require("./routes/player.routes")(app);
 require("./routes/sport.routes")(app);
 require("./routes/user.routes")(app);
+require("./routes/review.routes")(app);
 require("./routes/geocoding.routes")(app);
 
 // set port, listen for requests
