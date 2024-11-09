@@ -514,6 +514,9 @@ exports.delete = async (req, res) => {
 exports.findAllGameInvites = async (req, res) => {
   console.log("findAllGameInvites called...");
   const userId = req.user.userID;
+  const futureFlag = req.headers["futureflag"];
+  const noCreations = req.headers["nocreations"];
+
   if (!userId) {
     console.log("ERROR");
     return res.status(401).send({ success: false, message: "Unauthorized" });
@@ -540,10 +543,30 @@ exports.findAllGameInvites = async (req, res) => {
         }
       });
       const gamesResults = await Promise.allSettled(gamesPromises);
-      const games = gamesResults
+      let games = gamesResults
         .filter((result) => result.status === "fulfilled")
         .map((result) => result.value);
 
+      if (futureFlag) {
+        const today = new Date().setHours(0, 0, 0, 0);
+        games = games.filter((game) => {
+          if (game) {
+            const gameDate = new Date(game.date).setHours(0, 0, 0, 0);
+            return gameDate >= today;
+          } else {
+            return false;
+          }
+        });
+      }
+      if (noCreations) {
+        games = games.filter((game) => {
+          if (game.userId != userId) {
+            return game;
+          } else {
+            return false;
+          }
+        });
+      }
       const locationsPromises = games.map(async (game) => {
         try {
           if (!game) {
@@ -778,16 +801,16 @@ exports.findAllAcceptedPlayerInvites = async (req, res) => {
     // Fetch all the games associated with the accepted invites
     const gamesPromises = acceptedInvites.map((invite) => invite.getGame());
     const games = await Promise.all(gamesPromises);
-
     const today = new Date().setHours(0, 0, 0, 0); // Reset time to midnight for comparison
 
     // Filter games that are on or after today
     const result = games.filter((game) => {
       if (game) {
-        const gameDate = new Date(game.date).setHours(0, 0, 0, 0); // Normalize to midnight
-        return gameDate >= today; // Only include future or current games
+        const gameDate = new Date(game.date).setHours(0, 0, 0, 0);
+        return gameDate >= today;
+      } else {
+        return false;
       }
-      return false;
     });
 
     console.log("Filtered Game Results:", result);
