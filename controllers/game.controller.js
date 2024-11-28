@@ -616,7 +616,6 @@ exports.findAllGameInvites = async (req, res) => {
           }
           return acc;
         }, []);
-      console.log("Player location was", playerLocation);
       res.status(200).send({
         success: true,
         availableGames: result,
