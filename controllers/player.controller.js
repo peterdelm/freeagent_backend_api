@@ -162,20 +162,37 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Find a single player with an id
-exports.findOne = (req, res) => {
+exports.findOne = async (req, res) => {
   console.log("Player.findOne Called");
   const id = req.params.id;
 
-  Player.findByPk(id)
-    .then((data) => {
-      res.status(200).send(data);
-    })
-    .catch((err) => {
-      res.status(500).send({
-        message: "Error retrieving player with id=" + id + err,
+  try {
+    const player = await Player.findByPk(id);
+
+    if (!player) {
+      return res.status(404).send({
+        message: `Player not found with id=${id}`,
       });
+    }
+
+    const playerData = {
+      location: player.location,
+      bio: player.bio,
+      calibre: player.calibre,
+      firstName: player.firstName,
+      id: player.id,
+      lastName: player.lastName,
+      position: player.position,
+      sport: player.sport,
+    };
+
+    res.status(200).send(playerData);
+  } catch (error) {
+    console.error("Error retrieving player:", error); // Log error for debugging
+    res.status(500).send({
+      message: "Error retrieving player with id=" + id,
     });
+  }
 };
 
 // Update a player by the id in the request
