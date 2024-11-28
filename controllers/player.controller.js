@@ -2,12 +2,13 @@ require("dotenv").config();
 const db = require("../models");
 const Player = db.players;
 const Location = db.locations;
+const Invite = db.invites;
+const { gameFindingLogic } = require("../workers/gameFindingLogic");
 
 const Op = db.Sequelize.Op;
 
 const createLocation = async (locationString, playerId) => {
   console.log("Calling createLocation");
-  console.log("with playerId, ", playerId);
 
   try {
     const coordinates = await getCoordinates(locationString);
@@ -74,6 +75,8 @@ const createNewLocation = async (playerId, coordinates, locationString) => {
 };
 
 // Create and Save a new Player
+
+//TASK: Add functionality to show matches to new players
 exports.create = async (req, res) => {
   try {
     console.log("A Create Player Request has arrived");
@@ -89,8 +92,6 @@ exports.create = async (req, res) => {
     //FIND THE ID of the User
     console.log("Auth token is " + req.headers.authorization);
 
-    // Decode and verify the JWT
-    // const userId = req.body.userId;
     const userId = req.user.userID;
 
     console.log("userId is", userId);
@@ -121,12 +122,10 @@ exports.create = async (req, res) => {
       userId: userId,
       isActive: true,
     };
-    console.log(player);
 
     const newPlayer = await Player.create(player);
     const newLocation = await createLocation(player.location, newPlayer.id);
 
-    // Save player in the database
     const response = {
       success: true, // Set the success property to true
       player: newPlayer,
@@ -135,6 +134,7 @@ exports.create = async (req, res) => {
     };
     res.status(200).send(response);
     console.log("Player Added");
+    createInvitesForNewPlayer(newPlayer.id);
   } catch (err) {
     console.log("Problem with request");
     console.log("err.name", err.name);
@@ -337,4 +337,60 @@ exports.findAllUserPlayers = async (req, res) => {
     console.log("JWT verification failed");
     res.status(401).send({ message: "Unauthorized" });
   }
+};
+
+const createInvitesForNewPlayer = async (playerId) => {
+  const availableGames = await gameFindingLogic(playerId);
+
+  const invitePromises = availableGames.map((game) => {
+    const inviteParams = {
+      playerId: playerId,
+      gameId: game.id,
+    };
+
+    return Invite.create(inviteParams);
+  });
+
+  try {
+    const inviteResults = await Promise.all(invitePromises);
+    inviteResults.forEach((invite) => {
+      console.log(`Invite created with id: ${invite.id}`);
+    });
+    console.log(`${inviteResults.length} invites created`);
+  } catch (error) {
+    console.error("Error creating invites:", error);
+  }
+};
+
+exports.matched = async (req, res) => {
+  console.log("Matched Request Received with player", req.body.player);
+
+  const availableGames = await gameFindingLogic(req.body);
+  const playerId = req.body.id;
+
+  // const invitePromises = availableGames.map((game) => {
+  //   const inviteParams = {
+  //     playerId: playerId,
+  //     gameId: game.id,
+  //   };
+
+  //   return Invite.create(inviteParams);
+  // });
+
+  // try {
+  //   const inviteResults = await Promise.all(invitePromises);
+  //   inviteResults.forEach((invite) => {
+  //     console.log(`Invite created with id: ${invite.id}`);
+  //   });
+  //   console.log(`${inviteResults.length} invites created`);
+  // } catch (error) {
+  //   console.error("Error creating invites:", error);
+  // }
+
+  const response = {
+    success: true,
+    games: availableGames,
+    message: "Matched Request Received",
+  };
+  res.status(200).send(response);
 };

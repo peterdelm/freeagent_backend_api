@@ -6,6 +6,7 @@ module.exports = (app) => {
   //public
   router.get("/", players.findAll);
   router.get("/published", players.findAllPublished);
+  router.get("/matched", players.matched);
   router.put("/:id", players.update);
   router.delete("/:id", players.delete);
   router.delete("/", players.deleteAll);
