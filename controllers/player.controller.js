@@ -184,6 +184,7 @@ exports.findOne = async (req, res) => {
       lastName: player.lastName,
       position: player.position,
       sport: player.sport,
+      userId: player.userId,
     };
 
     res.status(200).send(playerData);
