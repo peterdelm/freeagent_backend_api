@@ -1,8 +1,10 @@
 const db = require("../models");
 const Task = db.tasks;
 const Game = db.games;
-const Player = db.players;
 const Invite = db.invites;
+
+const { sendPushNotification } = require("../services/firebaseService.js");
+const { playerFindingLogic } = require("./playerFindingLogic"); // Import the worker module
 
 async function processTask(task) {
   try {
@@ -11,154 +13,9 @@ async function processTask(task) {
     //Get the game associated with the task
     const game = await Game.findByPk(task.gameId);
 
-    //Criteria:
-    //1. Gender == Gender
-    //2. Sport == Sport
-    //3. Position == Position
-    //4. Calibre == Calibre
-    //5. isActive == true
-    //6. Range >= Distance from Player to Stadium
+    const playerOptions = await playerFindingLogic(task, game);
 
-    //create a failure/retry case for when there is no suitable Player found
-
-    let playerOptions;
-
-    if (
-      // Case 1: All values are 'any'
-      game.gender === "Any" &&
-      game.position === "Any" &&
-      game.calibre === "Any"
-    ) {
-      console.log("Testing Case 1");
-      console.log(
-        "Gender: " + game.gender,
-        "Position: " + game.position,
-        "Calibre: " + game.calibre
-      );
-
-      playerOptions = await Player.findAll({
-        where: { isActive: true, sport: game.sport },
-      });
-
-      if (playerOptions.length === 0) {
-        console.log("No players found for current criteria");
-      } else {
-        console.log("playerOptions are: ");
-      }
-    } else if (
-      // Case 2: Gender and position are 'any', calibre is 'specific'
-      game.gender === "Any" &&
-      game.position === "Any" &&
-      game.calibre !== "Any"
-    ) {
-      console.log("Testing Case 2");
-
-      playerOptions = await Player.findAll({
-        where: {
-          isActive: true,
-          sport: game.sport,
-          calibre: game.calibre,
-        },
-      });
-    } else if (
-      // Case 3: Calibre and gender are 'any', position is 'specific'
-      game.gender === "Any" &&
-      game.position !== "Any" &&
-      game.calibre === "Any"
-    ) {
-      console.log("Testing Case 3");
-
-      playerOptions = await Player.findAll({
-        where: {
-          isActive: true,
-          sport: game.sport,
-          position: game.position,
-        },
-      });
-    } else if (
-      // Case 4: Position and Calibre are 'any', Gender is 'specific'
-      game.gender !== "Any" &&
-      game.position === "Any" &&
-      game.calibre === "Any"
-    ) {
-      console.log("Testing Case 4");
-
-      playerOptions = await Player.findAll({
-        where: {
-          isActive: true,
-          sport: game.sport,
-          gender: game.gender,
-        },
-      });
-    } else if (
-      // Case 5: Gender is 'any', position and calibre are 'specific'
-      game.gender === "Any" &&
-      game.position !== "Any" &&
-      game.calibre !== "Any"
-    ) {
-      console.log("Testing Case 5");
-
-      playerOptions = await Player.findAll({
-        where: {
-          isActive: true,
-          sport: game.sport,
-          position: game.position,
-          calibre: game.calibre,
-        },
-      });
-    } else if (
-      // Case 6:
-      game.gender !== "Any" &&
-      game.position === "Any" &&
-      game.calibre !== "Any"
-    ) {
-      console.log("Testing Case 6");
-
-      playerOptions = await Player.findAll({
-        where: {
-          isActive: true,
-          sport: game.sport,
-          gender: game.gender,
-          calibre: game.calibre,
-        },
-      });
-    } else if (
-      // Case 7:
-      game.gender !== "Any" &&
-      game.position !== "Any" &&
-      game.calibre === "Any"
-    ) {
-      console.log("Testing Case 7");
-
-      playerOptions = await Player.findAll({
-        where: {
-          isActive: true,
-          sport: game.sport,
-          gender: game.gender,
-          position: game.position,
-        },
-      });
-    } else if (
-      // Case 8: All values are 'specific'
-      game.gender != "Any" &&
-      game.position != "Any" &&
-      game.calibre != "Any"
-    ) {
-      console.log("Testing Case 8");
-      playerOptions = await Player.findAll({
-        where: {
-          isActive: true,
-          sport: game.sport,
-          gender: game.gender,
-          position: game.position,
-          calibre: game.calibre,
-        },
-      });
-    } else {
-      console.log("No Player Found for Current Criteria");
-    }
-
-    console.log("Player Found with ID: " + playerOptions[0].id);
+    let userPushTokens = [];
 
     for (const player of playerOptions) {
       inviteParams = {
@@ -167,10 +24,23 @@ async function processTask(task) {
       };
 
       const invite = await Invite.create(inviteParams);
+      const user = await player.getUser();
       console.log("Player ID: " + player.id);
       console.log("Invite ID: " + invite.id);
+      console.log("User pushToken is: " + user.pushToken);
+      // Collect the push tokens
+      if (user.pushToken) {
+        userPushTokens.push(user.pushToken);
+      }
     }
+
+    const data = { gameId: game.id };
     //Send the request to the suitable players
+    const response = sendPushNotification({
+      userPushTokens: userPushTokens,
+      data: data,
+    });
+    console.log("Expo Firebase response is", response);
     //Await the response...
     //Upon response, kill the pending game
     //Notify the manager

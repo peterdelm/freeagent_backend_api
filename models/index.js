@@ -30,9 +30,11 @@ db.participants = require("./participant.model.js")(sequelize, Sequelize);
 db.messages = require("./message.model.js")(sequelize, Sequelize);
 db.tasks = require("./task.model.js")(sequelize, Sequelize);
 db.locations = require("./location.model.js")(sequelize, Sequelize);
+db.reviews = require("./review.model.js")(sequelize, Sequelize);
 
 db.players.belongsTo(db.users, { foreignKey: "userId" });
 db.players.hasMany(db.invites, { foreignKey: "playerId" });
+db.players.hasOne(db.locations, { foreignKey: "playerId" });
 
 db.games.belongsTo(db.users, { foreignKey: "userId" });
 db.games.hasMany(db.invites, { foreignKey: "gameId" });
@@ -59,5 +61,8 @@ db.participants.belongsTo(db.users, { foreignKey: "userId" });
 db.participants.belongsTo(db.conversations, {
   foreignKey: "conversationId",
 });
+
+db.locations.belongsTo(db.players, { foreignKey: "playerId" });
+db.locations.belongsTo(db.games, { foreignKey: "gameId" });
 
 module.exports = db;

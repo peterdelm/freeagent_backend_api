@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
 
       Game.hasOne(models.Location, {
         foreignKey: "gameId",
-        as: "Locations",
+        as: "location",
         onDelete: "CASCADE",
       });
     }

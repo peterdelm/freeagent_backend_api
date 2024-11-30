@@ -1,5 +1,6 @@
 "use strict";
 
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("Locations", {
@@ -23,9 +24,19 @@ module.exports = {
       },
       gameId: {
         type: Sequelize.UUID,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "Games",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      playerId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+        references: {
+          model: "Players",
           key: "id",
         },
         onUpdate: "CASCADE",

@@ -2,9 +2,10 @@
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Location extends Model {
-    static associate = (models) => {
+    static associate(models) {
       Location.belongsTo(models.Game, { foreignKey: "gameId" });
-    };
+      Location.belongsTo(models.Player, { foreignKey: "playerId" });
+    }
   }
   Location.init(
     {
@@ -16,10 +17,18 @@ module.exports = (sequelize, DataTypes) => {
       gameId: {
         type: DataTypes.UUID,
         references: {
-          model: "games", // This should match the table name of the User model
-          key: "id", // This should match the primary key of the User model
+          model: "games",
+          key: "id",
         },
-        allowNull: false,
+        allowNull: true,
+      },
+      playerId: {
+        type: DataTypes.UUID,
+        references: {
+          model: "players",
+          key: "id",
+        },
+        allowNull: true,
       },
       longitude: {
         type: DataTypes.DOUBLE,
@@ -37,8 +46,8 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Location",
-      timestamps: true, // Automatically adds createdAt and updatedAt columns
-      updatedAt: "updatedAt", // Customize the name of the updatedAt column if needed
+      timestamps: true,
+      updatedAt: "updatedAt",
     }
   );
   return Location;

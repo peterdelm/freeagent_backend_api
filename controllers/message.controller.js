@@ -251,7 +251,7 @@ exports.findAllPending = async (req, res) => {
   console.log("FindAll Pending Games Request Received");
 
   try {
-    const userId = await authenticateUserToken(req);
+    const userId = req.user.userID;
 
     //FIND ACTIVE GAMES BELONGING TO THE USER
     try {

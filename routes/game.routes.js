@@ -2,31 +2,21 @@ module.exports = (app) => {
   const games = require("../controllers/game.controller.js");
 
   var router = require("express").Router();
-
-  // Create a new Game
-  router.post("/", games.create);
-
-  // Retrieve all Games
+  const authenticateUserToken = require("../middleware/auth");
+  //public
   router.get("/", games.findAll);
-
-  // Retrieve all published Games
-  router.get("/active", games.findAllActive);
-
   router.get("/pending", games.findAllPending);
 
+  //protected routes
+  router.use(authenticateUserToken);
   router.get("/invites", games.findAllGameInvites);
-
   router.get("/acceptedplayerinvites", games.findAllAcceptedPlayerInvites);
-
-  // Retrieve a single Games with id
+  router.get("/active", games.findAllActive);
+  router.post("/", games.create);
+  router.put("/quitGame", games.quitGame);
   router.get("/:id", games.findOne);
-  // Update a Game
-  router.put("/joinGame", games.joinGame);
-
-  // Update a Game with an i
   router.put("/:id", games.update);
-
-  // Delete a Game with id
+  router.put("/joinGame/:id", games.joinGame);
   router.delete("/:id", games.delete);
 
   app.use("/api/games", router);

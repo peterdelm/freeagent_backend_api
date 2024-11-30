@@ -8,7 +8,6 @@ exports.findAll = async (req, res) => {
   try {
     const sports = await Sport.findAll();
     if (sports) {
-      console.log(sports);
       res.status(200).send({
         sports: sports,
       });
@@ -30,8 +29,6 @@ exports.findAll = async (req, res) => {
 
 // Create and Save a new Sport
 exports.create = (req, res) => {
-  console.log("A request has arrived");
-  console.log(req.body.sport);
   // Validate request
   if (!req.body.sport) {
     res.status(400).send({
@@ -54,7 +51,6 @@ exports.create = (req, res) => {
   Sport.create(sport)
     .then((data) => {
       res.send(data);
-      console.log("Sport Added");
     })
     .catch((err) => {
       console.log("Problem with request");
@@ -76,7 +72,6 @@ exports.findOne = (req, res) => {
 
   Sport.findByPk(id)
     .then((data) => {
-      console.log(data);
       res.send(data);
     })
     .catch((err) => {

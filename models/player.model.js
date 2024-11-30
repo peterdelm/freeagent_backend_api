@@ -12,7 +12,14 @@ module.exports = (sequelize, DataTypes) => {
       Player.belongsTo(models.User, {
         foreignKey: "userId",
         as: "user",
-        allowNull: false,
+        allowNull: true,
+        onDelete: "CASCADE",
+      });
+
+      Player.hasOne(models.Location, {
+        foreignKey: "playerId",
+        as: "location",
+        allowNull: true,
         onDelete: "CASCADE",
       });
     }
@@ -35,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
       sport: DataTypes.STRING,
       position: DataTypes.STRING,
       travelRange: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false,
         validate: {
           notEmpty: {

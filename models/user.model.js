@@ -32,6 +32,8 @@ module.exports = (sequelize, DataTypes) => {
           isIn: [["player", "manager"]],
         },
       },
+      refreshToken: DataTypes.STRING,
+      pushToken: DataTypes.STRING,
     },
     {
       sequelize,
