@@ -185,6 +185,7 @@ exports.findOne = async (req, res) => {
       position: player.position,
       sport: player.sport,
       userId: player.userId,
+      travelRange: player.travelRange,
     };
 
     res.status(200).send(playerData);
@@ -220,7 +221,8 @@ exports.update = async (req, res) => {
     if (typeof location !== "undefined" && location.trim() !== "") {
       updates.location = location;
     }
-    if (typeof travelRange !== "undefined" && travelRange.trim() !== "") {
+    if (typeof travelRange !== "undefined" && travelRange !== "") {
+      console.log("Updating travel range to", travelRange);
       updates.travelRange = travelRange;
     }
     if (typeof gender !== "undefined" && gender.trim() !== "") {
