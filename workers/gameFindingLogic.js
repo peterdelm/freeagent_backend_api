@@ -4,9 +4,11 @@ const Player = db.players;
 const Location = db.locations;
 const { Op } = require("sequelize");
 
-const gameFindingLogic = async (playerId) => {
+const gameFindingLogic = async (player) => {
   try {
     console.log("Game Finding logic has been called");
+    console.log(player);
+    const playerId = player.id;
 
     const newPlayer = await Player.findByPk(playerId);
     if (!newPlayer) {
@@ -20,6 +22,56 @@ const gameFindingLogic = async (playerId) => {
       return [];
     }
 
+    let calibreFilter = [];
+
+    console.log("Sport", player.sport);
+
+    // Predefined order of calibres for different sports
+    const hockeyHierarchy = [
+      "A (Semi Pro / Major Jr experience)",
+      "B (Jr B/C, Varsity, AA/AAA experience)",
+      "C (Select, Rep / All Star, A experience)",
+      "D (House League experience)",
+      "E (little/ no experience)",
+    ];
+
+    const soccerHierarchy = ["Recreational", "Intermediate", "Advanced"];
+    const volleyballHierarchy = ["Recreational", "Intermediate", "Advanced"];
+    const frisbeeHierarchy = ["Recreational", "Intermediate", "Advanced"];
+    const basketballHierarchy = ["Recreational", "Competitive"];
+
+    // Function to assign the correct hierarchy based on the sport
+    const assignHierarchy = () => {
+      if (newPlayer.sport === "Hockey") {
+        return hockeyHierarchy;
+      } else if (newPlayer.sport === "Soccer") {
+        return soccerHierarchy;
+      } else if (newPlayer.sport === "Volleyball") {
+        return volleyballHierarchy;
+      } else if (newPlayer.sport === "Frisbee") {
+        return frisbeeHierarchy;
+      } else if (newPlayer.sport === "Basketball") {
+        return basketballHierarchy;
+      } else {
+        return [];
+      }
+    };
+
+    const calibreHierarchy = assignHierarchy();
+
+    console.log("Heirarchy is", calibreHierarchy);
+    // Find the index of the game calibre in the hierarchy
+    const calibreIndex = calibreHierarchy.indexOf(player.calibre);
+
+    if (calibreIndex !== -1) {
+      // Slice the array to include the calibres from the current level and above
+      calibreFilter = calibreHierarchy.slice(0, calibreIndex + 1);
+    } else {
+      // Optionally handle the case if no matching calibre is found
+      calibreFilter = [];
+    }
+
+    console.log("CalibreFilter is", calibreFilter);
     const games = await Game.findAll({
       where: {
         sport: newPlayer.sport,
@@ -27,7 +79,7 @@ const gameFindingLogic = async (playerId) => {
           [Op.in]: ["Any", newPlayer.position],
         },
         calibre: {
-          [Op.in]: ["Any", newPlayer.calibre],
+          [Op.in]: calibreFilter,
         },
         gender: {
           [Op.in]: ["Any", newPlayer.gender],

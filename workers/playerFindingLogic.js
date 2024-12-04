@@ -87,6 +87,52 @@ const playerFindingLogic = async (task) => {
     //Also isActive == true
 
     //create a failure/retry case for when there is no suitable Player found
+    // Create the `calibre` filter based on the game calibre
+    let calibreFilter = [];
+
+    // Predefined order of calibres for different sports
+    const hockeyHierarchy = [
+      "A (Semi Pro / Major Jr experience)",
+      "B (Jr B/C, Varsity, AA/AAA experience)",
+      "C (Select, Rep / All Star, A experience)",
+      "D (House League experience)",
+      "E (little/ no experience)",
+    ];
+
+    const soccerHierarchy = ["Advanced", "Intermediate", "Recreational"];
+    const volleyballHierarchy = ["Advanced", "Intermediate", "Recreational"];
+    const frisbeeHierarchy = ["Advanced", "Intermediate", "Recreational"];
+    const basketballHierarchy = ["Recreational", "Competitive"];
+
+    // Function to assign the correct hierarchy based on the sport
+    const assignHierarchy = () => {
+      if (game.sport === "Hockey") {
+        return hockeyHierarchy;
+      } else if (game.sport === "Soccer") {
+        return soccerHierarchy;
+      } else if (game.sport === "Volleyball") {
+        return volleyballHierarchy;
+      } else if (game.sport === "Frisbee") {
+        return frisbeeHierarchy;
+      } else if (game.sport === "Basketball") {
+        return basketballHierarchy;
+      } else {
+        return [];
+      }
+    };
+
+    const calibreHierarchy = assignHierarchy();
+
+    // Find the index of the game calibre in the hierarchy
+    const calibreIndex = calibreHierarchy.indexOf(game.calibre);
+
+    if (calibreIndex !== -1) {
+      // Slice the array to include the calibres from the current level and above
+      calibreFilter = calibreHierarchy.slice(0, calibreIndex + 1);
+    } else {
+      // Optionally handle the case if no matching calibre is found
+      calibreFilter = [];
+    }
 
     let playerOptions;
 
@@ -214,14 +260,15 @@ const playerFindingLogic = async (task) => {
       game.position != "Any" &&
       game.calibre != "Any"
     ) {
-      console.log("Testing Case 8");
       playerOptions = await Player.findAll({
         where: {
           isActive: true,
           sport: game.sport,
           gender: game.gender,
           position: game.position,
-          calibre: game.calibre,
+          calibre: {
+            [Op.in]: calibreFilter,
+          },
         },
       });
     } else {

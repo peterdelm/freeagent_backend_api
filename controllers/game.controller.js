@@ -161,6 +161,7 @@ exports.create = async (req, res) => {
       gameType: req.body.gameType,
       gender: req.body.gender,
       teamName: req.body.teamName,
+      locationName: req.body.locationName,
       additionalInfo: req.body.additionalInfo,
       isActive: true,
       userId: userId,
