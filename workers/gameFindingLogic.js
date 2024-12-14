@@ -4,11 +4,10 @@ const Player = db.players;
 const Location = db.locations;
 const { Op } = require("sequelize");
 
-const gameFindingLogic = async (player) => {
+const gameFindingLogic = async (playerId) => {
   try {
     console.log("Game Finding logic has been called");
-    console.log(player);
-    const playerId = player.id;
+    console.log(playerId);
 
     const newPlayer = await Player.findByPk(playerId);
     if (!newPlayer) {
@@ -24,15 +23,13 @@ const gameFindingLogic = async (player) => {
 
     let calibreFilter = [];
 
-    console.log("Sport", player.sport);
-
     // Predefined order of calibres for different sports
     const hockeyHierarchy = [
-      "A (Semi Pro / Major Jr experience)",
-      "B (Jr B/C, Varsity, AA/AAA experience)",
-      "C (Select, Rep / All Star, A experience)",
-      "D (House League experience)",
       "E (little/ no experience)",
+      "D (House League experience)",
+      "C (Select, Rep / All Star, A experience)",
+      "B (Jr B/C, Varsity, AA/AAA experience)",
+      "A (Semi Pro / Major Jr experience)",
     ];
 
     const soccerHierarchy = ["Recreational", "Intermediate", "Advanced"];
@@ -48,7 +45,7 @@ const gameFindingLogic = async (player) => {
         return soccerHierarchy;
       } else if (newPlayer.sport === "Volleyball") {
         return volleyballHierarchy;
-      } else if (newPlayer.sport === "Frisbee") {
+      } else if (newPlayer.sport === "Ultimate Frisbee") {
         return frisbeeHierarchy;
       } else if (newPlayer.sport === "Basketball") {
         return basketballHierarchy;
@@ -61,7 +58,7 @@ const gameFindingLogic = async (player) => {
 
     console.log("Heirarchy is", calibreHierarchy);
     // Find the index of the game calibre in the hierarchy
-    const calibreIndex = calibreHierarchy.indexOf(player.calibre);
+    const calibreIndex = calibreHierarchy.indexOf(newPlayer.calibre);
 
     if (calibreIndex !== -1) {
       // Slice the array to include the calibres from the current level and above
@@ -71,15 +68,27 @@ const gameFindingLogic = async (player) => {
       calibreFilter = [];
     }
 
+    let excludedPositions = [];
+    let includedPositions = [];
+
+    if (newPlayer.position === "Any non-goalie") {
+      excludedPositions.push("Goalie");
+      includedPositions.push("Forward", "Defence");
+    }
+
     console.log("CalibreFilter is", calibreFilter);
+    console.log("excludedPositions are", excludedPositions);
+    console.log("includedPositions are", includedPositions);
+
     const games = await Game.findAll({
       where: {
         sport: newPlayer.sport,
         position: {
-          [Op.in]: ["Any", newPlayer.position],
+          [Op.notIn]: excludedPositions,
+          [Op.in]: ["Any", newPlayer.position, ...includedPositions],
         },
         calibre: {
-          [Op.in]: calibreFilter,
+          [Op.in]: ["Any", ...calibreFilter],
         },
         gender: {
           [Op.in]: ["Any", newPlayer.gender],

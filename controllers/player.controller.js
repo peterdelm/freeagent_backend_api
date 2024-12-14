@@ -109,12 +109,13 @@ exports.create = async (req, res) => {
       return;
     } else {
       console.log("This player does not have a ", req.body.sport, "profile");
+      console.log("Req.body is", req.body);
     }
     // Create a player
     const player = {
       gender: req.body.gender,
       calibre: req.body.calibre,
-      location: req.body.location,
+      location: req.body.location.formattedAddress,
       sport: req.body.sport,
       travelRange: req.body.travelRange,
       position: req.body.position,
@@ -351,7 +352,6 @@ exports.findAllUserPlayers = async (req, res) => {
       players: players,
       message: message,
     };
-    console.log(response.players);
     res.status(200).send(response);
   } catch (err) {
     console.log("JWT verification failed");
@@ -360,6 +360,7 @@ exports.findAllUserPlayers = async (req, res) => {
 };
 
 const createInvitesForNewPlayer = async (playerId) => {
+  console.log("createInvitesForNewPlayer called for player with ID", playerId);
   const availableGames = await gameFindingLogic(playerId);
 
   const invitePromises = availableGames.map((game) => {

@@ -513,7 +513,7 @@ exports.delete = async (req, res) => {
 };
 
 exports.findAllGameInvites = async (req, res) => {
-  console.log("findAllGameInvites called...");
+  console.log("findAllGameInvites called for user with ID", req.user.userID);
   const userId = req.user.userID;
   const futureFlag = req.headers["futureflag"];
   const noCreations = req.headers["nocreations"];
