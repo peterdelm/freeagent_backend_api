@@ -148,6 +148,14 @@ exports.create = async (req, res) => {
     // getGeocode(address, apiKey);
 
     ////////////PLACE GEOCODING CALL ABOVE////////////////////
+    let locationName = ""
+    const locationStart = req.body.location.split(',')[0]
+    if (req.body.locationName === locationStart) {
+      locationName = ""
+    }
+    else {
+      locationName = req.body.locationName
+    }
 
     // Create a Game
     const game = {
@@ -161,7 +169,7 @@ exports.create = async (req, res) => {
       gameType: req.body.gameType,
       gender: req.body.gender,
       teamName: req.body.teamName,
-      locationName: req.body.locationName,
+      locationName: locationName,
       additionalInfo: req.body.additionalInfo,
       isActive: true,
       userId: userId,
@@ -376,6 +384,7 @@ exports.update = async (req, res) => {
     //if the value of  is blank, use the original value
     const {
       location,
+      locationName,
       date,
       time,
       calibre,
@@ -395,6 +404,13 @@ exports.update = async (req, res) => {
     const updates = {};
     if (typeof location !== "undefined" && location.trim() !== "") {
       updates.location = location;
+      const locationStart = location.split(',')[0]
+      if (locationName === locationStart) {
+        updates.locationName = ""
+      }
+      else {
+        updates.locationName = locationName
+      }
     }
     if (date?.dateString?.trim()) {
       const parsedDate = parseISO(date.dateString);
