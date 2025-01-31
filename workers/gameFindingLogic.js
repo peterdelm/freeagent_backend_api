@@ -71,9 +71,20 @@ const gameFindingLogic = async (playerId) => {
     let excludedPositions = [];
     let includedPositions = [];
 
-    if (newPlayer.position === "Any non-goalie") {
+    if (
+      newPlayer.position === "Any non-goalie" ||
+      "Forward" ||
+      "Defence" ||
+      "Midfielder"
+    ) {
+      console.log("Player.position is", newPlayer.position);
       excludedPositions.push("Goalie");
-      includedPositions.push("Forward", "Defence");
+      includedPositions.push(
+        "Forward",
+        "Defence",
+        "Any non-goalie",
+        "Midfielder"
+      );
     }
 
     console.log("CalibreFilter is", calibreFilter);

@@ -148,13 +148,12 @@ exports.create = async (req, res) => {
     // getGeocode(address, apiKey);
 
     ////////////PLACE GEOCODING CALL ABOVE////////////////////
-    let locationName = ""
-    const locationStart = req.body.location.split(',')[0]
+    let locationName = "";
+    const locationStart = req.body.location.split(",")[0];
     if (req.body.locationName === locationStart) {
-      locationName = ""
-    }
-    else {
-      locationName = req.body.locationName
+      locationName = "";
+    } else {
+      locationName = req.body.locationName;
     }
 
     // Create a Game
@@ -404,12 +403,11 @@ exports.update = async (req, res) => {
     const updates = {};
     if (typeof location !== "undefined" && location.trim() !== "") {
       updates.location = location;
-      const locationStart = location.split(',')[0]
+      const locationStart = location.split(",")[0];
       if (locationName === locationStart) {
-        updates.locationName = ""
-      }
-      else {
-        updates.locationName = locationName
+        updates.locationName = "";
+      } else {
+        updates.locationName = locationName;
       }
     }
     if (date?.dateString?.trim()) {
@@ -456,6 +454,35 @@ exports.update = async (req, res) => {
             res.send({
               success: true,
               message: "Game was updated successfully.",
+            });
+
+            // Run invite deletion and creation in the background
+            setImmediate(async () => {
+              try {
+                // 1. Delete old invites first
+                await deleteInvitesForUpdatedGame(gameId);
+
+                const task = {
+                  gameId: gameId,
+                  status: "pending",
+                };
+                Object.keys(task).forEach((key) => {
+                  console.log(`${key}: ${task[key]}`);
+                });
+                const newTask = await Task.create(task);
+                // console.log("New Task Created: ", newTask); // Log the new task for debugging
+
+                if (!newTask) {
+                  throw new Error("Failed to create a new task.");
+                } else {
+                  console.log("Task Added");
+                }
+              } catch (error) {
+                console.error(
+                  "Error handling invites in the background:",
+                  error
+                );
+              }
             });
           } else {
             console.log("Problem with game.update");
@@ -531,8 +558,8 @@ exports.delete = async (req, res) => {
 exports.findAllGameInvites = async (req, res) => {
   console.log("findAllGameInvites called for user with ID", req.user.userID);
   const userId = req.user.userID;
-  const futureFlag = req.headers["futureflag"];
-  const noCreations = req.headers["nocreations"];
+  const futureFlag = req.headers["futureflag"]; //Flag to avoid requesting games that have happened already
+  const noCreations = req.headers["nocreations"]; //Flag to avoid requesting games the user has created
 
   if (!userId) {
     console.log("ERROR");
@@ -621,6 +648,7 @@ exports.findAllGameInvites = async (req, res) => {
                 time: game.time,
                 sport: game.sport,
                 location: game.location,
+                locationName: game.locationName,
                 matchedPlayerId: game.matchedPlayerId,
                 position: game.position,
                 calibre: game.calibre,
@@ -842,5 +870,44 @@ exports.findAllAcceptedPlayerInvites = async (req, res) => {
       success: false,
       message: "An error occurred while fetching games.",
     });
+  }
+};
+
+const deleteInvitesForUpdatedGame = async (gameId) => {
+  console.log("deleteInvitesForUpdatedGame called for game with ID", gameId);
+
+  // Retrieve invites associated with the player
+  const invites = await Invite.findAll({
+    where: { gameId: gameId, accepted: false },
+  });
+
+  if (invites.length === 0) {
+    console.log("No invites found for game with ID", gameId);
+    return;
+  }
+
+  // Create delete promises for each invite
+  const deletePromises = invites.map((invite) => {
+    return Invite.destroy({
+      where: { id: invite.id },
+    });
+  });
+
+  try {
+    // Execute all delete operations concurrently
+    const deleteResults = await Promise.all(deletePromises);
+
+    // Log the results
+    deleteResults.forEach((result, index) => {
+      if (result === 1) {
+        console.log(
+          `Invite with ID ${invites[index].id} was successfully deleted.`
+        );
+      }
+    });
+
+    console.log(`${deleteResults.length} invites deleted.`);
+  } catch (error) {
+    console.error("Error deleting invites:", error);
   }
 };

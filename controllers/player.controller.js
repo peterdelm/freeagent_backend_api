@@ -1,6 +1,7 @@
 require("dotenv").config();
 const db = require("../models");
 const Player = db.players;
+const User = db.users;
 const Location = db.locations;
 const Invite = db.invites;
 const { gameFindingLogic } = require("../workers/gameFindingLogic");
@@ -96,6 +97,10 @@ exports.create = async (req, res) => {
 
     console.log("userId is", userId);
 
+    const user = await User.findByPk(userId);
+
+    console.log("User found with name", user.firstName);
+
     const players = await Player.findAll({
       where: { userId: userId },
     });
@@ -113,6 +118,8 @@ exports.create = async (req, res) => {
     }
     // Create a player
     const player = {
+      firstName: user.firstName,
+      lastName: user.lastName,
       gender: req.body.gender,
       calibre: req.body.calibre,
       location: req.body.location.formattedAddress,
@@ -201,70 +208,85 @@ exports.findOne = async (req, res) => {
 // Update a player by the id in the request
 exports.update = async (req, res) => {
   console.log("Player.update request received");
+
   try {
-    console.log(req.body);
     const playerId = req.params.id;
-    console.log("BoDy is ", req.body);
-    //if the value of calibre, location, position, gender is blank, use the original value
-    const { calibre, location, travelRange, gender, bio, position } = req.body;
+    const {
+      calibre,
+      location: { address },
+      travelRange,
+      gender,
+      bio,
+      position,
+    } = req.body;
+
+    console.log("Request body:", req.body);
 
     const player = await Player.findByPk(playerId);
     if (!player) {
-      console.log("Player not found with id" + playerId);
+      console.log("Player not found with id", playerId);
       return res.status(404).json({ error: "Player not found." });
     }
-    //create an object to hold any changes
+
     const updates = {};
 
-    if (typeof calibre !== "undefined" && calibre.trim() !== "") {
-      updates.calibre = calibre;
-    }
-    if (typeof location !== "undefined" && location.trim() !== "") {
-      updates.location = location;
-    }
-    if (typeof travelRange !== "undefined" && travelRange !== "") {
-      console.log("Updating travel range to", travelRange);
-      updates.travelRange = travelRange;
-    }
-    if (typeof gender !== "undefined" && gender.trim() !== "") {
-      updates.gender = gender;
-    }
-    if (typeof bio !== "undefined" && bio.trim() !== "") {
-      updates.bio = bio;
-    }
-    if (typeof position !== "undefined" && position.trim() !== "") {
-      updates.position = position;
-    }
+    if (calibre?.trim()) updates.calibre = calibre;
+    if (address?.trim()) updates.location = address;
+    if (travelRange || travelRange === 0) updates.travelRange = travelRange;
+    if (gender?.trim()) updates.gender = gender;
+    if (bio?.trim()) updates.bio = bio;
+    if (position?.trim()) updates.position = position;
+    if (bio?.trim() === "" && player.bio != "") updates.bio = bio;
+
     if (Object.keys(updates).length > 0) {
-      Player.update(updates, {
-        where: { id: playerId },
-      })
-        .then((num) => {
-          if (num == 1) {
-            res.send({
-              success: true,
-              message: "player was updated successfully.",
-            });
-          } else {
-            console.log("Problem with player.update");
-            res.send({
-              message: `Cannot update player with id=${playerId}. Maybe player was not found or req.body is empty!`,
-            });
-          }
-        })
-        .catch((err) => {
-          res.status(500).send({
-            message: "Error updating player with id=" + playerId,
-          });
+      try {
+        const [updated] = await Player.update(updates, {
+          where: { id: playerId },
         });
+
+        if (updated === 1) {
+          console.log("Player updated successfully.");
+
+          // Send the response immediately
+          res.send({
+            success: true,
+            message: "Player was updated successfully.",
+          });
+
+          // Run invite deletion and creation in the background
+          setImmediate(async () => {
+            try {
+              // 1. Delete old invites first
+              await deleteInvitesForUpdatedPlayer(playerId);
+
+              // 2. Create new invites afterward
+              await createInvitesForUpdatedPlayer(playerId);
+            } catch (error) {
+              console.error("Error handling invites in the background:", error);
+            }
+          });
+
+          return;
+        } else {
+          console.log("Problem with player.update");
+          return res.send({
+            message: `Cannot update player with id=${playerId}. Maybe player was not found or req.body is empty!`,
+          });
+        }
+      } catch (err) {
+        console.error("Error updating player:", err);
+        return res.status(500).send({
+          message: "Error updating player with id=" + playerId,
+        });
+      }
     } else {
-      res.send({
+      return res.send({
         success: true,
-        message: "No Changes to Player Were Made",
+        message: "No changes to player were made.",
       });
     }
   } catch (error) {
-    console.error(error);
+    console.error("Unexpected error:", error);
     return res.status(500).json({ error: "Internal server error." });
   }
 };
@@ -380,6 +402,74 @@ const createInvitesForNewPlayer = async (playerId) => {
     console.log(`${inviteResults.length} invites created`);
   } catch (error) {
     console.error("Error creating invites:", error);
+  }
+};
+
+const createInvitesForUpdatedPlayer = async (playerId) => {
+  console.log(
+    "createInvitesForUpdatedPlayer called for player with ID",
+    playerId
+  );
+  const availableGames = await gameFindingLogic(playerId);
+
+  const invitePromises = availableGames.map((game) => {
+    const inviteParams = {
+      playerId: playerId,
+      gameId: game.id,
+    };
+
+    return Invite.create(inviteParams);
+  });
+
+  try {
+    const inviteResults = await Promise.all(invitePromises);
+    inviteResults.forEach((invite) => {
+      console.log(`Invite created with id: ${invite.id}`);
+    });
+    console.log(`${inviteResults.length} invites created`);
+  } catch (error) {
+    console.error("Error creating invites:", error);
+  }
+};
+const deleteInvitesForUpdatedPlayer = async (playerId) => {
+  console.log(
+    "deleteInvitesForUpdatedPlayer called for player with ID",
+    playerId
+  );
+
+  // Retrieve invites associated with the player
+  const invites = await Invite.findAll({
+    where: { playerId: playerId, accepted: false },
+  });
+
+  if (invites.length === 0) {
+    console.log("No invites found for player with ID", playerId);
+    return;
+  }
+
+  // Create delete promises for each invite
+  const deletePromises = invites.map((invite) => {
+    return Invite.destroy({
+      where: { id: invite.id },
+    });
+  });
+
+  try {
+    // Execute all delete operations concurrently
+    const deleteResults = await Promise.all(deletePromises);
+
+    // Log the results
+    deleteResults.forEach((result, index) => {
+      if (result === 1) {
+        console.log(
+          `Invite with ID ${invites[index].id} was successfully deleted.`
+        );
+      }
+    });
+
+    console.log(`${deleteResults.length} invites deleted.`);
+  } catch (error) {
+    console.error("Error deleting invites:", error);
   }
 };
 
