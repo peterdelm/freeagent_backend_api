@@ -95,7 +95,7 @@ exports.findAll = (req, res) => {
 exports.verifyToken = async (req, res) => {
   try {
     console.log("User.verifyToken request received");
-    const secretKey = process.env.SECRET_KEY;
+    const secretKey = dbConfig.SECRET_KEY;
 
     // Ensure that the authorization header exists
     if (!req.headers.authorization) {
