@@ -39,7 +39,7 @@ const generateToken = async (userId) => {
 
 exports.refreshToken = (req, res) => {
   console.log("Refreshing AuthToken in refreshToken...");
-  const secretKey = process.env.SECRET_KEY;
+  const secretKey = dbConfig.SECRET_KEY;
   const refreshSecretKey = dbConfig.REFRESH_SECRET;
 
   // Extract the token from the authorization header
@@ -95,7 +95,7 @@ exports.findAll = (req, res) => {
 exports.verifyToken = async (req, res) => {
   try {
     console.log("User.verifyToken request received");
-    const secretKey = process.env.SECRET_KEY;
+    const secretKey = dbConfig.SECRET_KEY;
 
     // Ensure that the authorization header exists
     if (!req.headers.authorization) {
