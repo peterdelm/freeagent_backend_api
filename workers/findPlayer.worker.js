@@ -4,7 +4,7 @@ const Game = db.games;
 const Invite = db.invites;
 
 const { sendPushNotification } = require("../services/firebaseService.js");
-const { playerFindingLogic } = require("./playerFindingLogic"); // Import the worker module
+const { playerFindingLogic } = require("./playerFindingLogic");
 
 async function processTask(task) {
   try {
@@ -35,9 +35,9 @@ async function processTask(task) {
     }
 
     const data = { gameId: game.id };
-    //Send the request to the suitable players
     const response = sendPushNotification({
       userPushTokens: userPushTokens,
+      messageType: "request",
       data: data,
     });
     console.log("Expo Firebase response is", response);

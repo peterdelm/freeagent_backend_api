@@ -1,5 +1,16 @@
 const { Expo } = require("expo-server-sdk");
-const sendPushNotification = async ({ userPushTokens, title, body, data }) => {
+
+//MessageTypes:
+// "request"
+// "gameAccepted"
+
+const sendPushNotification = async ({
+  userPushTokens,
+  title,
+  body,
+  data,
+  messageType,
+}) => {
   let expo = new Expo({
     // accessToken: process.env.EXPO_ACCESS_TOKEN,
     useFcmV1: true, // this can be set to true in order to use the FCM v1 API
@@ -20,14 +31,26 @@ const sendPushNotification = async ({ userPushTokens, title, body, data }) => {
 
     console.log("gameId is", gameId);
     console.log("data is", data);
+    console.log("messageType is", messageType);
 
-    messages.push({
-      to: pushToken,
-      sound: "default",
-      title: "Free Agent",
-      body: "A Game Needs You!",
-      data: { data, url: `free_agent://` },
-    });
+    if (messageType == "request") {
+      messages.push({
+        to: pushToken,
+        sound: "default",
+        title: "Free Agent",
+        body: "A Game Needs You!",
+        data: { data, url: `free_agent://` },
+      });
+    }
+    if (messageType == "gameAccepted") {
+      messages.push({
+        to: pushToken,
+        sound: "default",
+        title: "Free Agent",
+        body: "Your Game has been Accepted",
+        data: { data, url: `free_agent://` },
+      });
+    }
   }
 
   // The Expo push notification service accepts batches of notifications so

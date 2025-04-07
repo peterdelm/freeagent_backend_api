@@ -1,5 +1,6 @@
 require("dotenv").config();
 const { isValid, parseISO } = require("date-fns");
+const { sendPushNotification } = require("../services/firebaseService.js");
 const db = require("../models");
 const Game = db.games;
 const Task = db.tasks;
@@ -725,6 +726,25 @@ exports.joinGame = async (req, res) => {
           where: { playerId: player.id, gameId: gameId },
         });
         console.log(`Marking Invite with ID ${acceptedInvite.id} as 'true'`);
+
+        let userPushTokens = [];
+
+        const manager = await User.findByPk(game.userId);
+        console.log("Manager ID: " + manager.id);
+        console.log("Game ID: " + gameId);
+        console.log("User pushToken is: " + manager.pushToken);
+        // Collect the push tokens
+        if (manager.pushToken) {
+          userPushTokens.push(manager.pushToken);
+        }
+
+        data = {};
+        //Send notification to manager that a player has accepted
+        const response = sendPushNotification({
+          userPushTokens: userPushTokens,
+          messageType: "gameAccepted",
+          data: data,
+        });
       } catch {
         ("Invite for player not found");
       }
