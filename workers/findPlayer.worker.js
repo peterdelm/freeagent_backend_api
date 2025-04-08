@@ -73,7 +73,7 @@ async function startWorker() {
     //   await currentTask;
     // }
 
-    process.exit(0); // Exit the process
+    process.exit(0);
   });
 
   while (running) {

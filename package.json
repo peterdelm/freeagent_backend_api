@@ -24,6 +24,7 @@
     "express-async-handler": "^1.2.0",
     "firebase": "^10.12.2",
     "jsonwebtoken": "^9.0.1",
+    "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.9",
     "pg": "^8.13.1",
