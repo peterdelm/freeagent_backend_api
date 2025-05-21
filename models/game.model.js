@@ -71,6 +71,7 @@ module.exports = (sequelize, DataTypes) => {
       matchedPlayerId: DataTypes.UUID,
       isActive: DataTypes.BOOLEAN,
       additionalInfo: DataTypes.TEXT,
+      reviewPrompted: DataTypes.BOOLEAN
     },
     {
       sequelize,

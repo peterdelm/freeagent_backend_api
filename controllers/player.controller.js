@@ -77,7 +77,6 @@ const createNewLocation = async (playerId, coordinates, locationString) => {
 
 // Create and Save a new Player
 
-//TASK: Add functionality to show matches to new players
 exports.create = async (req, res) => {
   try {
     console.log("A Create Player Request has arrived");
@@ -135,7 +134,7 @@ exports.create = async (req, res) => {
     const newLocation = await createLocation(player.location, newPlayer.id);
 
     const response = {
-      success: true, // Set the success property to true
+      success: true, 
       player: newPlayer,
       location: newLocation,
       message: "Player Added",
@@ -350,12 +349,8 @@ exports.findAllUserPlayers = async (req, res) => {
   console.log("FindAll User Players Request Received");
 
   try {
-    // Decode and verify the JWT
-
     const userId = req.user.userID;
-
     console.log("JWT verification succeeded. User ID is " + userId);
-
     //FIND ACTIVE GAMES BELONGING TO THE USER
 
     console.log("Finding player profiles for user " + userId + "...");
@@ -478,25 +473,6 @@ exports.matched = async (req, res) => {
 
   const availableGames = await gameFindingLogic(req.body);
   const playerId = req.body.id;
-
-  // const invitePromises = availableGames.map((game) => {
-  //   const inviteParams = {
-  //     playerId: playerId,
-  //     gameId: game.id,
-  //   };
-
-  //   return Invite.create(inviteParams);
-  // });
-
-  // try {
-  //   const inviteResults = await Promise.all(invitePromises);
-  //   inviteResults.forEach((invite) => {
-  //     console.log(`Invite created with id: ${invite.id}`);
-  //   });
-  //   console.log(`${inviteResults.length} invites created`);
-  // } catch (error) {
-  //   console.error("Error creating invites:", error);
-  // }
 
   const response = {
     success: true,

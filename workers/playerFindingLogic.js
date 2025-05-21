@@ -5,14 +5,6 @@ const Location = db.locations;
 const sequelize = db.sequelize;
 const { Op } = require("sequelize");
 
-// let criteria = {
-//   range: range,
-//   gender: gender,
-//   position: position,
-//   calibre: calibre,
-//   sport: sport,
-// };
-
 //Returns an array of players which fit the criteria
 const playerFindingLogic = async (task) => {
   try {

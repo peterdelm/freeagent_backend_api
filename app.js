@@ -17,7 +17,7 @@ const app = express();
 
 // Set up mongoose connection
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize("freeagent_database", "peter", "sudo", {
+const sequelize = new Sequelize("freeagent_database", "peeter", "sudo", {
   host: "165.227.42.133",
   dialect: "postgres",
 });

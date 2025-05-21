@@ -13,11 +13,15 @@ const Op = db.Sequelize.Op;
 
 const createLocation = async (locationString, gameId) => {
   console.log("Calling createLocation");
-  console.log("with gameId, ", gameId);
+  console.log("with gameId,", gameId);
+  console.log("with locationString,", locationString);
+
 
   try {
     const coordinates = await getCoordinates(locationString);
     console.log("Calling getCoordinates");
+    console.log("Coordinates are:", encodeURIComponent(coordinates));
+
 
     if (coordinates) {
       console.log("Latitude:", coordinates.latitude);
@@ -44,7 +48,7 @@ const getCoordinates = async (locationString) => {
       )}&key=AIzaSyDbPFYhBsYTcD_ala9nEOjlM_bkFyALMuI`
     );
     const data = await response.json();
-
+    console.log("Data response is", data)
     if (data.results && data.results.length > 0) {
       const { lat, lng } = data.results[0].geometry.location;
       return { latitude: lat, longitude: lng };
@@ -674,14 +678,13 @@ exports.findAllGameInvites = async (req, res) => {
   }
 };
 
-// Find a single Game with an id
 exports.joinGame = async (req, res) => {
   console.log("Join game request received");
 
   const gameId = req.params.id;
   const userId = req.user.userID;
   console.log("gameId =", gameId);
-  console.log("userId =", userId);
+  console.log("userId =", userId)
 
   try {
     // Check if gameId is provided
@@ -704,7 +707,7 @@ exports.joinGame = async (req, res) => {
     } else {
       console.log(game);
     }
-    // Do something with the game, e.g., join the game
+
     const player = await Player.findOne({
       where: { isActive: true, userId: userId, sport: game.sport },
     });
