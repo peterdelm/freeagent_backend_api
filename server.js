@@ -32,7 +32,17 @@ const app = express();
 //   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 // };
 
-app.use(cors("*"));
+app.use(
+  cors({
+    origin: ["https://getfreeagent.ca"],
+    credentials: true,
+  })
+);
+// 🔹 Top-level logger — runs for *every* request
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next(); // don't forget to call next()
+});
 
 // parse requests of content-type - application/json
 app.use(express.json());

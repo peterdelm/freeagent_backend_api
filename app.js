@@ -57,6 +57,12 @@ app.set("view engine", "ejs"); // Replace 'ejs' with your chosen view engine
 // Specify the directory where your views are located
 app.set("views", path.join(__dirname, "views")); // Replace 'views' with your actual views directory
 
+// 🔹 Top-level logger — runs for *every* request
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  next(); // don't forget to call next()
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
